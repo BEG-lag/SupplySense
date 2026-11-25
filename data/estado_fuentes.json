@@ -1,11 +1,13 @@
 {
   "cfe": {
-    "registros": 114976,
+    "registros": 114977,
     "ultima_ok": "2026-11-25"
   },
   "comprasmx": {
     "archivos": {
+      "Contratos_ComprasMX_2025.csv": 129112,
       "Contratos_ComprasMX_2026.csv": 92547,
+      "Expedientes_ComprasMX_2025.csv": 95094,
       "Expedientes_ComprasMX_2026.csv": 88103
     },
     "ultima_ok": "2026-11-25"
