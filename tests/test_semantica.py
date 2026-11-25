@@ -45,3 +45,9 @@ def test_export_quantizes_and_scores_open_records(monkeypatch):
     assert vectors.size == len(model["vocab"]) * 4
     assert docs.size == 2 * 4
     assert model["stopwords"] == sorted(semantica.STOPWORDS)
+
+
+def test_tiny_corpus_does_not_break_the_build():
+    model = semantica.export(["una sola compra"], [{"id": "a", "titulo": "una sola compra"}])
+    assert model["ids"] == []
+    assert model["docs"] == ""

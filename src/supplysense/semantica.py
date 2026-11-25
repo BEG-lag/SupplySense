@@ -131,11 +131,16 @@ def train(texts: Iterable[str]) -> tuple[list[str], np.ndarray, np.ndarray]:
     ppmi = sparse.csr_matrix(
         (pmi[keep].astype(np.float32), (coo.row[keep], coo.col[keep])), shape=(n, n)
     )
-    u, s, _ = svds(ppmi, k=DIM, v0=np.full(n, 1 / math.sqrt(n)))  # v0 fijo: determinista
-    vectors = u * np.sqrt(s)
-    vectors /= np.linalg.norm(vectors, axis=1, keepdims=True) + 1e-9
     total_docs = len(docs) or 1
     idf = np.array([math.log(total_docs / (1 + df[w])) for w in vocab], dtype=np.float32)
+    k = min(DIM, n - 2)
+    if k < 1 or ppmi.nnz == 0:
+        # Corpus demasiado chico para entrenar: modelo vacío, la búsqueda por significado no
+        # agrega resultados (el build no se rompe).
+        return vocab, np.zeros((n, DIM), dtype=np.float32), idf
+    u, s, _ = svds(ppmi, k=k, v0=np.full(n, 1 / math.sqrt(n)))  # v0 fijo: determinista
+    vectors = u * np.sqrt(s)
+    vectors /= np.linalg.norm(vectors, axis=1, keepdims=True) + 1e-9
     return vocab, vectors.astype(np.float32), idf
 
 
@@ -165,7 +170,7 @@ def export(texts: Iterable[str], open_records: list[dict[str, Any]]) -> dict[str
             docs.append(v)
     return {
         "version": 1,
-        "dim": DIM,
+        "dim": int(vectors.shape[1]) if vectors.ndim == 2 else DIM,
         "stopwords": sorted(STOPWORDS),
         "vocab": vocab,
         "idf": [round(float(x), 2) for x in idf],
