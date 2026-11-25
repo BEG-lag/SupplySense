@@ -58,6 +58,7 @@ export default function Sources() {
           <li>Los registros se guardan en archivos de texto versionados: cada cambio de una fuente queda en el historial público del repositorio.</li>
           <li>Las reglas son archivos legibles: compradores del sector, palabras de contexto, categorías y correcciones manuales.</li>
           <li>Cada registro lleva una de 35 categorías, en tres grupos: energía y O&amp;G, salud y general. La vertical de energía reúne a CFE, PEMEX, las dependencias del sector y lo que menciona gasoductos, hidrocarburos o refinerías.</li>
+          <li>La búsqueda por significado usa vectores de palabras entrenados cada día con los títulos de unas 530 mil compras públicas (co-ocurrencias, PPMI y SVD). El modelo pesa alrededor de 1.5 MB, es un archivo del propio sitio y la comparación se hace en tu navegador: no se envía lo que buscas a ningún servicio.</li>
           <li>Los precios son percentiles del monto adjudicado por contrato (ComprasMX) o por procedimiento (CFE), en pesos. Los contratos en dólares se convierten con el tipo de cambio FIX del día de firma. Montos atípicos (arriba del percentil 99 de su categoría o debajo de $10,000) se excluyen.</li>
           <li>Los ganadores son públicos por ley y así se publican. El RFC solo se muestra para personas morales; el de personas físicas contiene su fecha de nacimiento y no se publica. Tampoco se guardan los nombres ni correos de los servidores públicos que operan los anuncios.</li>
         </ol>

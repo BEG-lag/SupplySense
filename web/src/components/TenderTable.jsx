@@ -32,7 +32,7 @@ function Closing({ rec, today }) {
   return <Tag tone="warn">{label}</Tag>
 }
 
-export default function TenderTable({ records, showWinner = false, viaGiro }) {
+export default function TenderTable({ records, showWinner = false, viaGiro, viaSem }) {
   const { data: meta } = useMeta()
   const { data: priceList } = useJson('precios.json')
   const prices = useMemo(() => Object.fromEntries((priceList || []).map((p) => [p.codigo, p])), [priceList])
@@ -62,6 +62,7 @@ export default function TenderTable({ records, showWinner = false, viaGiro }) {
                     <span className="num">{rec.numero}</span>
                     <Tag tone="accent">{categoryName(meta, rec.categoria)}</Tag>
                     {viaGiro?.has(rec.id) && <Tag>Mismo giro</Tag>}
+                    {viaSem?.has(rec.id) && <Tag>Por significado</Tag>}
                     <Closing rec={rec} today={today} />
                   </div>
                   {showWinner && rec.ganador && <div className="mt-1 text-xs text-ink-2">Ganó: {rec.ganador}</div>}
@@ -92,6 +93,7 @@ export default function TenderTable({ records, showWinner = false, viaGiro }) {
               <Status rec={rec} meta={meta} today={today} />
               <Tag tone="accent">{categoryName(meta, rec.categoria)}</Tag>
               {viaGiro?.has(rec.id) && <Tag>Mismo giro</Tag>}
+                    {viaSem?.has(rec.id) && <Tag>Por significado</Tag>}
               <Closing rec={rec} today={today} />
             </div>
             <div className="mt-2 text-[13px] text-ink-2">

@@ -32,7 +32,7 @@ from typing import Any
 
 import duckdb
 
-from . import feeds, rules, store
+from . import feeds, rules, semantica, store
 from .dates import day_of
 from .sources import comprasmx, pemex
 from .text import company_key, fold, slug, title_name
@@ -908,6 +908,15 @@ def build_site(
             ],
         },
     )
+
+    # Búsqueda por significado: vectores entrenados con todos los títulos del corpus.
+    texts = [
+        f"{r.get('titulo') or ''} {r.get('descripcion') or ''}"
+        for coll in (procs, contracts)
+        for r in coll.values()
+    ]
+    write_json(out / "semantica.json", semantica.export(texts, open_recs))
+    del texts
 
     # Feeds.
     for rel, xml in feeds.all_feeds(open_recs, names, buyers).items():

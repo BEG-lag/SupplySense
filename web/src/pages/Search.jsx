@@ -8,10 +8,13 @@ import { liveStatus, todayMx } from '../lib/dates.js'
 import { buyerName, categoryName, SOURCE_NAMES, useMeta } from '../lib/meta.jsx'
 import { useSaved } from '../lib/saved.js'
 import { inferCategories } from '../lib/giros.js'
+import { loadSemantic, scoreOpen } from '../lib/semantica.js'
 import { applyFilters, describeFilters, filtersFromParams } from '../lib/search.js'
 import { Button, Empty, ErrorNote, Input, Loading, PageHeader, Pagination, Select } from '../ui/index.jsx'
 
 const PAGE = 25
+const SEM_MIN = 0.72
+const SEM_MAX = 40
 
 function yearsFor(filters, anio, meta) {
   if (filters.estatus === 'abierta') return []
@@ -65,17 +68,34 @@ export default function Search() {
   const today = todayMx()
   const exact = params.get('exacto') === '1'
   const giros = useMemo(() => (filters.q && !filters.categoria ? inferCategories(filters.q, meta) : new Set()), [filters.q, filters.categoria, meta])
-  const { results, viaGiro } = useMemo(() => {
-    if (!state.records) return { results: [], viaGiro: new Set() }
+  // Búsqueda por significado: solo sobre convocatorias abiertas, con el modelo del propio sitio.
+  const [semScores, setSemScores] = useState(null)
+  useEffect(() => {
+    setSemScores(null)
+    if (!filters.q || filters.estatus !== 'abierta' || exact) return undefined
+    let alive = true
+    loadSemantic().then((model) => alive && setSemScores(scoreOpen(filters.q, model)), () => {})
+    return () => { alive = false }
+  }, [filters.q, filters.estatus, exact])
+  const { results, viaGiro, viaSem } = useMemo(() => {
+    const empty = { results: [], viaGiro: new Set(), viaSem: new Set() }
+    if (!state.records) return empty
     const opts = { buyers: meta?.compradores, today }
     const direct = applyFilters(state.records, filters, opts)
-    if (exact || !giros.size) return { results: direct, viaGiro: new Set() }
+    if (exact || !filters.q) return { ...empty, results: direct }
     const seen = new Set(direct.map((r) => r.id))
     const { q: _q, ...rest } = filters
-    const extra = applyFilters(state.records, rest, opts).filter((r) => giros.has(r.categoria) && !seen.has(r.id))
-    return { results: [...direct, ...extra], viaGiro: new Set(extra.map((r) => r.id)) }
+    const pool = applyFilters(state.records, rest, opts).filter((r) => !seen.has(r.id))
+    const byGiro = pool.filter((r) => giros.has(r.categoria))
+    const bySem = semScores
+      ? pool.filter((r) => (semScores.get(r.id) ?? 0) >= SEM_MIN && !giros.has(r.categoria))
+        .sort((a, b) => semScores.get(b.id) - semScores.get(a.id)).slice(0, SEM_MAX)
+      : []
+    const score = (r) => semScores?.get(r.id) ?? 0.5
+    const extra = [...byGiro, ...bySem].sort((a, b) => score(b) - score(a))
+    return { results: [...direct, ...extra], viaGiro: new Set(byGiro.map((r) => r.id)), viaSem: new Set(bySem.map((r) => r.id)) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.records, params.toString(), giros])
+  }, [state.records, params.toString(), giros, semScores])
 
   const update = (changes) => {
     const next = new URLSearchParams(params)
@@ -194,16 +214,22 @@ export default function Search() {
           {state.records && results.length === 0 && (
             <Empty title="Sin resultados">Prueba con otras palabras o quita algún filtro.</Empty>
           )}
-          {filters.q && giros.size > 0 && (
+          {filters.q && (exact || viaGiro.size > 0 || viaSem.size > 0) && (
             <p className="mb-3 text-[13px] text-ink-2">
               {exact
-                ? <>Solo coincidencias con tus palabras. <button type="button" className="text-accent underline-offset-4 hover:underline" onClick={() => update({ exacto: '' })}>Incluir el mismo giro</button></>
-                : <>Incluye <span className="num text-ink">{viaGiro.size}</span> del giro {[...giros].map((g) => categoryName(meta, g)).join(', ')} que no usan tus palabras. <button type="button" className="text-accent underline-offset-4 hover:underline" onClick={() => update({ exacto: '1' })}>Ver solo coincidencias</button></>}
+                ? <>Solo coincidencias con tus palabras. <button type="button" className="text-accent underline-offset-4 hover:underline" onClick={() => update({ exacto: '' })}>Incluir giro y significado</button></>
+                : <>
+                    Además de las que usan tus palabras, incluye{' '}
+                    {viaGiro.size > 0 && <><span className="num text-ink">{viaGiro.size}</span> del giro {[...giros].map((g) => categoryName(meta, g)).join(', ')}</>}
+                    {viaGiro.size > 0 && viaSem.size > 0 && ' y '}
+                    {viaSem.size > 0 && <><span className="num text-ink">{viaSem.size}</span> con significado parecido</>}
+                    . <button type="button" className="text-accent underline-offset-4 hover:underline" onClick={() => update({ exacto: '1' })}>Ver solo coincidencias</button>
+                  </>}
             </p>
           )}
           {results.length > 0 && (
             <>
-              <TenderTable records={visible} showWinner={filters.estatus === 'adjudicada'} viaGiro={viaGiro} />
+              <TenderTable records={visible} showWinner={filters.estatus === 'adjudicada'} viaGiro={viaGiro} viaSem={viaSem} />
               <Pagination page={page} pages={pages} onPage={(p) => { update({ pagina: String(p) }); window.scrollTo(0, 0) }} />
             </>
           )}

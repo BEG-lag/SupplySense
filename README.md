@@ -40,8 +40,10 @@ and oil & gas is its featured vertical. Every record links to its official sourc
   winning".
 - **Winners, companies and buyers**: recent awards, each company's history and who each agency
   buys from.
-- **Search by trade**: "patrullas" (patrol cars) also finds vehicle tenders, using the build's
-  classification rules plus a synonym list, all in the browser.
+- **Search by trade and by meaning**: "patrullas" (patrol cars) also finds vehicle tenders (the
+  build's classification rules plus a synonym list), and semantically similar ones come from word
+  vectors trained on ~530,000 procurement titles. The model is a file on the site itself and
+  everything runs in the browser.
 - **Legal frame and calendar** on every procedure: the law the source reports (and CFE's and
   PEMEX's own regimes, linked to [leyes-mx](https://github.com/BEG-lag/leyes-mx)), what the
   procedure type means and the clarification, opening and award dates. Not legal advice.

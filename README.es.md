@@ -40,8 +40,10 @@ comprador. Energía y O&G es su vertical destacada. Cada registro liga a su fuen
   "probabilidad de ganar".
 - **Ganadores, empresas y compradores**: adjudicaciones recientes, historial de cada empresa y a
   quién le compra cada dependencia.
-- **Búsqueda por giro**: "patrullas" también encuentra las convocatorias de vehículos, con las
-  mismas reglas de clasificación del build y una lista de sinónimos, todo en el navegador.
+- **Búsqueda por giro y por significado**: "patrullas" también encuentra las convocatorias de
+  vehículos (mismas reglas de clasificación del build y una lista de sinónimos), y las parecidas
+  por significado salen de vectores de palabras entrenados con los títulos de unas 530 mil
+  compras públicas. El modelo es un archivo del propio sitio y todo se calcula en el navegador.
 - **Marco legal y calendario** en cada procedimiento: la ley aplicable que reporta la fuente (y el
   régimen propio de CFE y PEMEX, ligado a [leyes-mx](https://github.com/BEG-lag/leyes-mx)), qué
   significa el tipo de procedimiento y las fechas de junta, apertura y fallo. No es opinión legal.

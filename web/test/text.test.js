@@ -83,3 +83,25 @@ describe('búsqueda por giro', () => {
     expect([...inferCategories('reparación de pozos', meta)]).toEqual(['perforacion'])
   })
 })
+
+import { embed, scoreOpen } from '../src/lib/semantica.js'
+
+describe('búsqueda por significado', () => {
+  // Vocabulario de juguete en 2 dimensiones: vehículos sobre el eje x, salud sobre el eje y.
+  const model = {
+    dim: 2,
+    stop: new Set(['de']),
+    index: new Map([['patrullas', 0], ['sedan', 1], ['guantes', 2]]),
+    idf: Float32Array.from([1, 1, 1]),
+    vectors: Int8Array.from([127, 0, 120, 30, 0, 127]),
+    ids: ['auto', 'salud'],
+    docs: Int8Array.from([127, 0, 0, 127]),
+  }
+  it('ignora palabras vacías y desconocidas', () => {
+    expect(embed('de xyz', model)).toBeNull()
+  })
+  it('ordena por cercanía de significado', () => {
+    const s = scoreOpen('sedán', model)
+    expect(s.get('auto')).toBeGreaterThan(s.get('salud'))
+  })
+})
