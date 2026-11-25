@@ -1,0 +1,21 @@
+# Descargas crudas de fuentes oficiales (se regeneran)
+.cache/
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+# Node
+node_modules/
+web/dist/
+# Salida del build del sitio
+site/
+# Sistema
+.DS_Store
+.env
+
+# Datos generados por supplysense build
+web/public/data/
+# Configuración local de Claude Code
+.claude/

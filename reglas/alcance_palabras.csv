@@ -1,0 +1,10 @@
+patron,motivo
+\bgasoducto,gasoducto
+\boleoducto,oleoducto
+\bpoliducto,poliducto
+\bhidrocarburo,hidrocarburos
+\bpetrolifero,petrolíferos
+plataforma (marina|petrolera)|costa afuera|offshore,costa afuera
+\bpozos? petrolero|perforacion de pozos petroleros,pozos petroleros
+\brefineria,refinería
+\bplanta (de )?ciclo combinado|central (termoelectrica|geotermica|hidroelectrica),generación eléctrica

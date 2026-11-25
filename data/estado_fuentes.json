@@ -1,0 +1,19 @@
+{
+  "_validadores": {},
+  "cfe": {
+    "registros": 114976,
+    "ultima_ok": "2026-11-25"
+  },
+  "comprasmx": {
+    "contratos": 2317,
+    "registros": 2132,
+    "ultima_ok": "2026-11-25"
+  },
+  "fix": {
+    "ultima_ok": "2026-11-25"
+  },
+  "pemex": {
+    "registros": 11926,
+    "ultima_ok": "2026-11-25"
+  }
+}

@@ -1,0 +1,24 @@
+fuente,estatus_fuente,estatus
+cfe,Vigente,abierta
+cfe,Adjudicado,adjudicada
+cfe,Contrato Sin Formalizar,adjudicada
+cfe,Desierto,desierta
+cfe,Cancelado,cancelada
+cfe,Suspendido,suspendida
+cfe,Impugnado,suspendida
+cfe,Concluido,concluida
+comprasmx,VIGENTE,abierta
+comprasmx,EN ACLARACIONES,abierta
+comprasmx,EN REPREGUNTAS,abierta
+comprasmx,PENDIENTE DE APERTURA,abierta
+comprasmx,EN APERTURA,en_evaluacion
+comprasmx,EN EVALUACIÓN,en_evaluacion
+comprasmx,EN DECISIÓN DE FALLO,en_evaluacion
+comprasmx,EN OSD,en_evaluacion
+comprasmx,ADJUDICADO,adjudicada
+comprasmx,ADJUDICADO PARCIAL,adjudicada
+comprasmx,DESIERTO,desierta
+comprasmx,CANCELADO,cancelada
+comprasmx,SUSPENDIDO,suspendida
+comprasmx,EXPIRADO,concluida
+comprasmx,FINALIZADO,concluida

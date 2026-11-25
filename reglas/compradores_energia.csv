@@ -1,0 +1,13 @@
+siglas,patron,nombre
+CFE,COMISI[OÓ]N FEDERAL DE ELECTRICIDAD|^CFE\b,Comisión Federal de Electricidad
+PEMEX,PETR[OÓ]LEOS MEXICANOS|^PEMEX\b,Petróleos Mexicanos
+IMP,INSTITUTO MEXICANO DEL PETR[OÓ]LEO,Instituto Mexicano del Petróleo
+CENACE,CENTRO NACIONAL DE CONTROL DE ENERG[IÍ]A,Centro Nacional de Control de Energía
+CENAGAS,CENTRO NACIONAL DE CONTROL DEL GAS NATURAL,Centro Nacional de Control del Gas Natural
+SENER,SECRETAR[IÍ]A DE ENERG[IÍ]A,Secretaría de Energía
+INEEL,INSTITUTO NACIONAL DE ELECTRICIDAD Y ENERG[IÍ]AS LIMPIAS,Instituto Nacional de Electricidad y Energías Limpias
+ASEA,AGENCIA NACIONAL DE SEGURIDAD INDUSTRIAL Y DE PROTECCI[OÓ]N AL MEDIO AMBIENTE DEL SECTOR HIDROCARBUROS,Agencia de Seguridad Energía y Ambiente
+CNE,COMISI[OÓ]N NACIONAL DE ENERG[IÍ]A,Comisión Nacional de Energía
+CRE,COMISI[OÓ]N REGULADORA DE ENERG[IÍ]A,Comisión Reguladora de Energía
+CNH,COMISI[OÓ]N NACIONAL DE HIDROCARBUROS,Comisión Nacional de Hidrocarburos
+CONUEE,COMISI[OÓ]N NACIONAL PARA EL USO EFICIENTE DE LA ENERG[IÍ]A,Comisión Nacional para el Uso Eficiente de la Energía
