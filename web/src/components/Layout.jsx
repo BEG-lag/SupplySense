@@ -34,6 +34,21 @@ function Brand() {
   )
 }
 
+// Logo de PIVOTEK junto al nombre del sitio (naranja sobre tinta). Los SVG viven en public/ y se
+// piden con la ruta base del sitio. El logotipo no baja de 90 px: donde no cabe va el isotipo
+// (456 a 539 px, y 1024 a 1059 px, cuando aparece el menú). Abajo de 456 px la barra ya no tiene
+// espacio y el logo se oculta; el crédito a PIVOTEK sigue en el pie.
+// Ajuste óptico: la línea base de "pivotek" y el ojo de la p del isotipo caen en la del nombre.
+function Pivotek() {
+  const base = import.meta.env.BASE_URL
+  return (
+    <a href="https://pivotek.mx" title="PIVOTEK" className="hidden h-[22px] flex-none items-center border-l border-line pl-4 hover:opacity-85 min-[456px]:flex">
+      <img src={`${base}pivotek-logotipo-naranja.svg`} alt="PIVOTEK" width="90" height="34" className="block translate-y-px max-[540px]:hidden lg:max-[1060px]:hidden" />
+      <img src={`${base}pivotek-isotipo-naranja.svg`} alt="PIVOTEK" width="21" height="24" className="hidden translate-y-[3px] max-[540px]:block lg:max-[1060px]:block" />
+    </a>
+  )
+}
+
 function Header() {
   const [open, setOpen] = useState(false)
   const { list } = useSaved()
@@ -48,6 +63,7 @@ function Header() {
     <header className="sticky top-0 z-30 border-b border-line bg-[rgba(10,12,16,0.82)] backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 sm:px-6">
         <Brand />
+        <Pivotek />
         <nav className="ml-auto hidden items-center gap-0.5 rounded-full border border-line bg-subtle p-1 lg:flex" aria-label="Principal">
           {NAV.map((n) => <NavLink key={n.to} to={n.to} className={pill}>{n.label}</NavLink>)}
         </nav>
