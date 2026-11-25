@@ -8,7 +8,7 @@ export function fold(text) {
     .replace(/[̀-ͯ]/g, '')
 }
 
-export const FILTER_KEYS = ['q', 'fuente', 'comprador', 'entidad', 'categoria', 'estatus']
+export const FILTER_KEYS = ['q', 'sector', 'fuente', 'comprador', 'entidad', 'categoria', 'estatus']
 
 export function filtersFromParams(params) {
   const out = {}
@@ -27,6 +27,7 @@ export function haystack(rec, buyers) {
 export function applyFilters(records, filters, { buyers, today } = {}) {
   const words = fold(filters.q).split(/\s+/).filter(Boolean)
   return records.filter((rec) => {
+    if (filters.sector && rec.sector !== filters.sector) return false
     if (filters.fuente && rec.fuente !== filters.fuente) return false
     if (filters.comprador && rec.comprador_id !== filters.comprador) return false
     if (filters.entidad && rec.entidad !== filters.entidad) return false
@@ -46,6 +47,7 @@ export function applyFilters(records, filters, { buyers, today } = {}) {
 export function describeFilters(filters, meta) {
   const parts = []
   if (filters.q) parts.push(`"${filters.q}"`)
+  if (filters.sector === 'energia') parts.push('Energía y O&G')
   if (filters.estatus) parts.push(meta?.estatus?.[filters.estatus] || filters.estatus)
   if (filters.fuente) parts.push(meta?.fuentes?.[filters.fuente]?.nombre || filters.fuente)
   if (filters.comprador) parts.push(meta?.compradores?.[filters.comprador] || filters.comprador)

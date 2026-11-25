@@ -6,7 +6,7 @@ import { formatDate, formatMXNShort, formatNumber } from '../lib/format.js'
 import { useMeta } from '../lib/meta.jsx'
 import { Button, Card, ErrorNote, Loading, Section, Stat } from '../ui/index.jsx'
 
-const EXAMPLES = ['válvulas', 'transformadores', 'grúas', 'mantenimiento de bombas', 'diésel', 'tubería']
+const EXAMPLES = ['medicamentos', 'limpieza', 'vehículos', 'válvulas', 'transformadores', 'construcción', 'equipo de cómputo']
 
 function SearchHero({ meta }) {
   const [q, setQ] = useState('')
@@ -21,15 +21,16 @@ function SearchHero({ meta }) {
       {meta && (
         <p className="eyebrow mx-auto mb-7 inline-flex items-center gap-2.5 rounded-full border border-line px-3.5 py-1.5">
           <span className="live" aria-hidden />
-          <span className="text-accent">{formatNumber(meta.totales.abiertas)}</span> convocatorias abiertas · CFE, PEMEX y ComprasMX
+          <span className="text-accent">{formatNumber(meta.totales.abiertas)}</span> convocatorias abiertas · ComprasMX, CFE y PEMEX
         </p>
       )}
       <h1 className="text-[38px] leading-[1] tracking-[-0.05em] sm:text-[60px]">
-        Licitaciones de energía y O&amp;G, con <em>lo que ya se pagó</em> por lo mismo
+        Licitaciones del gobierno, con <em>lo que ya se pagó</em> por lo mismo
       </h1>
       <p className="mx-auto mt-4 max-w-2xl text-[16px] leading-relaxed text-ink-2 sm:text-[17px]">
-        Cada mañana reunimos las convocatorias abiertas de CFE, PEMEX y el sector energía, y las
-        cruzamos con diez años de adjudicaciones: quién ganó, a qué precio y para qué comprador.
+        Cada mañana reunimos las convocatorias abiertas de todo el gobierno federal en ComprasMX,
+        más CFE y PEMEX, y las cruzamos con más de 300 mil adjudicaciones: quién ganó, a qué
+        precio y para qué comprador.
       </p>
       <form
         className="mx-auto mt-7 flex max-w-xl gap-2"
@@ -41,7 +42,7 @@ function SearchHero({ meta }) {
           id="q-home"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="¿Qué vendes? Ej. válvulas de compuerta"
+          placeholder="¿Qué vendes? Ej. material de curación"
           className="h-12 min-w-0 flex-1 rounded-full border border-line-strong bg-subtle px-5 text-[15px] text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none"
         />
         <Button type="submit" size="lg">Buscar</Button>
@@ -85,6 +86,29 @@ export default function Home() {
         </Card>
       )}
 
+      {meta && (
+        <Card className="mt-6 grid gap-5 p-6 sm:grid-cols-[1.3fr_1fr] sm:items-center">
+          <div>
+            <p className="eyebrow mb-2 flex items-center gap-2"><span className="lights" aria-hidden><i /><i /><i /></span> Vertical destacada</p>
+            <h2 className="text-2xl tracking-[-0.04em]">Energía y O&amp;G</h2>
+            <p className="mt-2 text-sm leading-relaxed text-ink-2">
+              CFE y PEMEX no publican en ComprasMX: los leemos directo de sus portales y los
+              cruzamos con diez años de adjudicaciones de CFE, más CENACE, CENAGAS, IMP y SENER.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 sm:items-end">
+            <div className="flex gap-6">
+              <Stat value={formatNumber(meta.sectores.energia.abiertas)} label="Abiertas en energía" />
+              <Stat value={formatNumber(meta.sectores.energia.procedimientos)} label="Procedimientos" />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button as={Link} size="sm" to="/buscar?sector=energia&estatus=abierta">Ver convocatorias</Button>
+              <Button as={Link} size="sm" variant="secondary" to="/precios#energia">Precios del sector</Button>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {topCats.length > 0 && (
         <div className="mt-6 flex flex-wrap gap-2">
           {topCats.map((c) => (
@@ -107,9 +131,9 @@ export default function Home() {
       <Section title="Qué puedes hacer">
         <div className="grid gap-4 md:grid-cols-3">
           {[
-            ['Encontrar convocatorias', 'Busca por lo que vendes en CFE, PEMEX, CENAGAS, CENACE, IMP y el resto del sector. Filtra por estado, categoría y comprador.', '/buscar?estatus=abierta', 'Buscar'],
-            ['Saber cuánto se ha pagado', 'Percentiles de precio por categoría con más de 90 mil adjudicaciones, y un comparador para ver dónde cae tu monto.', '/precios', 'Ver precios'],
-            ['Ver quién gana', 'Ganadores recientes, empresas con más contratos y concentración de cada mercado.', '/ganadores', 'Ver ganadores'],
+            ['Encontrar convocatorias', 'Busca por lo que vendes en más de 800 dependencias federales, CFE y PEMEX. Filtra por estado, categoría, comprador y sector.', '/buscar?estatus=abierta', 'Buscar'],
+            ['Saber cuánto se ha pagado', 'Percentiles de precio en 35 categorías con más de 300 mil adjudicaciones, y un comparador para ver dónde cae tu monto.', '/precios', 'Ver precios'],
+            ['Ver quién gana', 'Ganadores recientes, 60 mil empresas con su historial y la concentración de cada mercado.', '/ganadores', 'Ver ganadores'],
           ].map(([title, text, to, cta]) => (
             <Card key={title} className="flex flex-col p-5">
               <h3 className="font-semibold">{title}</h3>

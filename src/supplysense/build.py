@@ -34,9 +34,10 @@ import duckdb
 
 from . import feeds, rules, store
 from .dates import day_of
-from .sources import pemex
-from .text import company_key, fold, slug
+from .sources import comprasmx, pemex
+from .text import company_key, fold, slug, title_name
 
+RAW_DIR = Path(".cache/raw")
 MIN_AMOUNT = 10_000
 RECENT_MONTHS = 36
 INDEX_FIELDS = (
@@ -54,6 +55,7 @@ INDEX_FIELDS = (
     "ganador",
     "primera_vez",
     "estatus_estimado",
+    "sector",
 )
 STATUS_LABELS = {
     "abierta": "Abierta",
@@ -229,7 +231,7 @@ def buyer_of(rec: dict[str, Any], cfe_names: dict[str, str]) -> tuple[str, str]:
     buyer = rules.match_buyer(rec.get("comprador"), siglas)
     if buyer:
         return slug(buyer.siglas), buyer.nombre
-    name = rec.get("comprador") or siglas or "Sin comprador"
+    name = title_name(rec.get("comprador")) or siglas or "Sin comprador"
     return slug(siglas or name), name
 
 
@@ -251,26 +253,47 @@ def final_status(rec: dict[str, Any], today: date) -> tuple[str, bool]:
 # ── construcción ─────────────────────────────────────────────────────────────
 
 
-def prepare(root: Path, today: date) -> dict[str, Any]:
+def load_comprasmx(
+    cache_dir: Path, seen: dict[str, str], today: date
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[str]]:
+    """Lee los archivos de ComprasMX de la caché (año anterior y en curso). Devuelve
+    expedientes, contratos y los archivos que faltaban."""
+    from .pipeline import first_seen, raw_path
+
+    procs: list[dict[str, Any]] = []
+    contracts: list[dict[str, Any]] = []
+    missing: list[str] = []
+    for year in (today.year - 1, today.year):
+        for kind, target in (("expedientes", procs), ("contratos", contracts)):
+            path = raw_path(cache_dir, kind, year)
+            if not path.exists():
+                missing.append(path.name)
+                continue
+            for rec in comprasmx.parse_file(path, kind):
+                rec["primera_vez"] = seen.get(rec["id"]) or first_seen(None, rec, today)
+                target.append(rec)
+    return procs, contracts, missing
+
+
+def prepare(root: Path, today: date, cache_dir: Path = RAW_DIR) -> dict[str, Any]:
     procs = store.load("procedimientos", root)
     contracts = store.load("contratos", root)
+    seen = store.load_seen(root)
+    cmx_procs, cmx_contracts, missing = load_comprasmx(cache_dir, seen, today)
+    procs.update({r["id"]: r for r in cmx_procs})
+    contracts.update({r["id"]: r for r in cmx_contracts})
     stale = apply_corrections(procs) + apply_corrections(contracts)
 
-    # Alcance y categorías con las reglas vigentes.
-    for collection in (procs, contracts):
-        for key in list(collection):
-            rec = collection[key]
-            text = f"{rec.get('titulo') or ''} {rec.get('descripcion') or ''}"
-            if rec["fuente"] == "comprasmx":
-                motivo = rules.scope_reason(rec.get("comprador"), rec.get("siglas"), text)
-                if not motivo:
-                    del collection[key]
-                    continue
-                rec["motivo_alcance"] = motivo
-            rec["categoria"] = rules.categorize(text, rec.get("tipo_contratacion"))
-
+    # Categorías y sector con las reglas vigentes.
     for collection in (procs, contracts):
         for rec in collection.values():
+            text = f"{rec.get('titulo') or ''} {rec.get('descripcion') or ''}"
+            if rec["fuente"] == "comprasmx":
+                rec["motivo_alcance"] = rules.scope_reason(
+                    rec.get("comprador"), rec.get("siglas"), text
+                )
+            rec["sector"] = rules.sector_of(rec.get("motivo_alcance"))
+            rec["categoria"] = rules.categorize(text, rec.get("tipo_contratacion"))
             rec["entidad"] = state_name(rec.get("entidad"))
 
     cfe_names = cfe_companies(procs)
@@ -292,6 +315,7 @@ def prepare(root: Path, today: date) -> dict[str, Any]:
         "buyers": buyers,
         "fix": fix,
         "stale_corrections": stale,
+        "comprasmx_faltantes": missing,
         "estado": store.load_json(root / "estado_fuentes.json", {}),
     }
 
@@ -313,6 +337,7 @@ def build_awards(
                 "titulo": rec["titulo"],
                 "numero": rec["numero"],
                 "categoria": rec["categoria"],
+                "sector": rec["sector"],
                 "comprador_id": rec["comprador_id"],
                 "entidad": rec.get("entidad"),
                 "tipo_contratacion": rec.get("tipo_contratacion"),
@@ -342,6 +367,7 @@ def build_awards(
                 "titulo": rec["titulo"],
                 "numero": rec.get("numero_contrato") or rec.get("numero_procedimiento"),
                 "categoria": rec["categoria"],
+                "sector": rec["sector"],
                 "comprador_id": rec["comprador_id"],
                 "entidad": rec.get("entidad"),
                 "tipo_contratacion": rec.get("tipo_contratacion"),
@@ -469,7 +495,7 @@ def similar_awards(
         for t in tokens(a["titulo"]):
             postings[t].append(i)
     n = len(pool) or 1
-    idf = {t: math.log(n / len(ids)) for t, ids in postings.items() if len(ids) <= 4000}
+    idf = {t: math.log(n / len(ids)) for t, ids in postings.items() if len(ids) <= 1500}
     result: dict[str, list[dict[str, Any]]] = {}
     for rec in procs.values():
         if rec["estatus"] not in ("abierta", "en_evaluacion"):
@@ -513,7 +539,7 @@ def compact_row(rec: dict[str, Any]) -> list[Any]:
     return [
         rec["id"],
         rec.get("numero"),
-        (rec.get("titulo") or "")[:160],
+        (rec.get("titulo") or "")[:140],
         rec["fuente"],
         rec["comprador_id"],
         rec.get("entidad"),
@@ -522,17 +548,57 @@ def compact_row(rec: dict[str, Any]) -> list[Any]:
         day_of(rec.get("publicado")),
         day_of(rec.get("apertura")),
         rec.get("monto"),
-        (rec.get("ganadores") or [None])[0],
+        _short((rec.get("ganadores") or [None])[0], 60),
         rec.get("primera_vez"),
         1 if rec.get("estatus_estimado") else 0,
+        rec.get("sector"),
     ]
 
 
-PUBLIC_DROP = {"archivo", "detalle_leido", "fuente_id"}
+PUBLIC_DROP = {"archivo", "detalle_leido", "fuente_id", "siglas"}
+CONTRACT_FIELDS = (
+    "id",
+    "numero_contrato",
+    "proveedor",
+    "proveedor_rfc",
+    "proveedor_tipo",
+    "estratificacion",
+    "monto",
+    "monto_min",
+    "moneda",
+    "firma",
+    "inicio",
+    "fin",
+    "estatus_contrato",
+)
+MAX_EMBEDDED_CONTRACTS = 20
+_ANUNCIO = re.compile(r"/detalle/([0-9a-f]{20,40})/")
+MAX_DESCRIPTION = 700
+
+
+def _short(text: str | None, limit: int) -> str | None:
+    if not text or len(text) <= limit:
+        return text
+    return text[: limit - 1].rstrip() + "…"
 
 
 def public_record(rec: dict[str, Any]) -> dict[str, Any]:
-    out = {k: v for k, v in rec.items() if k not in PUBLIC_DROP and v not in (None, "", [], {})}
+    """Registro para el detalle del sitio, sin campos internos ni repetidos. La liga de
+    ComprasMX se reduce a su identificador y la de CFE (siempre la misma) se omite."""
+    out = {
+        k: v for k, v in rec.items() if k not in PUBLIC_DROP and v not in (None, "", [], {}, False)
+    }
+    if out.get("comprador_nombre"):
+        out.pop("comprador", None)
+    if rec["fuente"] == "comprasmx" and rec.get("url"):
+        m = _ANUNCIO.search(rec["url"])
+        if m:
+            out["anuncio"] = m.group(1)
+            out.pop("url", None)
+    elif rec["fuente"] == "cfe":
+        out.pop("url", None)
+    if out.get("descripcion"):
+        out["descripcion"] = _short(out["descripcion"], MAX_DESCRIPTION)
     if rec.get("ganadores"):
         out["ganadores_ids"] = [company_key(g) for g in rec["ganadores"]]
     if rec.get("proveedor"):
@@ -540,13 +606,27 @@ def public_record(rec: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+def contract_summary(rec: dict[str, Any]) -> dict[str, Any]:
+    """Contrato dentro del detalle de su procedimiento: solo lo propio del contrato."""
+    out = {k: rec[k] for k in CONTRACT_FIELDS if rec.get(k) not in (None, "", [], {})}
+    if rec.get("proveedor"):
+        out["proveedor_id"] = company_key(rec["proveedor"])
+    return out
+
+
 def build_site(
-    root: Path, out: Path, *, today: date, cache_dir: Path = Path(".cache/build")
+    root: Path,
+    out: Path,
+    *,
+    today: date,
+    cache_dir: Path = Path(".cache/build"),
+    raw_dir: Path = RAW_DIR,
 ) -> dict[str, Any]:
-    data = prepare(root, today)
+    data = prepare(root, today, raw_dir)
     procs, contracts, awards = data["procs"], data["contracts"], data["awards"]
     buyers, estado = data["buyers"], data["estado"]
     names = rules.category_names()
+    groups = rules.category_groups()
 
     if out.exists():
         shutil.rmtree(out)
@@ -561,20 +641,22 @@ def build_site(
     )
     write_json(out / "abiertas.json", [compact_row(r) for r in open_recs])
 
-    # Índice por año.
-    by_year: dict[str, list[list[Any]]] = defaultdict(list)
+    # Índice por año y sector: buscar en energía solo baja la parte de energía.
+    by_year: dict[tuple[str, str], list[list[Any]]] = defaultdict(list)
     for rec in sorted(
         procs.values(), key=lambda r: (r.get("publicado") or "", r["id"]), reverse=True
     ):
-        by_year[(rec.get("publicado") or "0000")[:4]].append(compact_row(rec))
-    for year, rows in by_year.items():
-        write_json(out / "indice" / f"{year}.json", rows)
+        year = (rec.get("publicado") or "0000")[:4]
+        by_year[(year, rec.get("sector") or "general")].append(compact_row(rec))
+    for (year, sector), rows in by_year.items():
+        write_json(out / "indice" / f"{year}-{sector}.json", rows)
+    years_index = sorted({year for year, _ in by_year}, reverse=True)
 
     # Detalle por fragmentos (procedimientos y contratos).
     contracts_by_proc: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for c in contracts.values():
         if c.get("procedimiento_id"):
-            contracts_by_proc[c["procedimiento_id"]].append(public_record(c))
+            contracts_by_proc[c["procedimiento_id"]].append(contract_summary(c))
     shards: dict[str, dict[str, Any]] = defaultdict(dict)
     for rec in procs.values():
         item = public_record(rec)
@@ -582,9 +664,17 @@ def build_site(
         if rec["id"] in similar:
             item["similares"] = similar[rec["id"]]
         if rec["id"] in contracts_by_proc:
-            item["contratos"] = sorted(contracts_by_proc[rec["id"]], key=lambda c: c["id"])
+            linked = sorted(
+                contracts_by_proc[rec["id"]], key=lambda c: (-(c.get("monto") or 0), c["id"])
+            )
+            item["contratos"] = linked[:MAX_EMBEDDED_CONTRACTS]
+            if len(linked) > MAX_EMBEDDED_CONTRACTS:
+                item["contratos_total"] = len(linked)
+                item["contratos_monto_total"] = round(sum(c.get("monto") or 0 for c in linked), 2)
         shards[shard(rec["id"])][rec["id"]] = item
     for c in contracts.values():
+        if c.get("procedimiento_id") in procs:
+            continue  # ya va dentro del detalle de su procedimiento
         item = public_record(c)
         item["tipo"] = "contrato"
         shards[shard(c["id"])][c["id"]] = item
@@ -616,6 +706,7 @@ def build_site(
         detail = {
             "codigo": cat,
             "nombre": names.get(cat, cat),
+            "grupo": groups.get(cat, "general"),
             **table,
             "concentracion_hhi": hhi(list(winners.values())),
             "ganadores": top,
@@ -641,6 +732,7 @@ def build_site(
             {
                 "codigo": cat,
                 "nombre": names.get(cat, cat),
+                "grupo": groups.get(cat, "general"),
                 "n": table["n"],
                 "p25": table["percentiles"]["25"],
                 "p50": table["percentiles"]["50"],
@@ -674,7 +766,7 @@ def build_site(
             c["compradores"][a["comprador_id"]] += 1
             if a.get("proveedor_rfc"):
                 c["rfc"] = a["proveedor_rfc"]
-            if len(c["adjudicaciones"]) < 40:
+            if len(c["adjudicaciones"]) < 15:
                 c["adjudicaciones"].append(
                     {
                         k: a[k]
@@ -733,6 +825,7 @@ def build_site(
             "categorias": Counter(),
             "proveedores": Counter(),
             "entidades": Counter(),
+            "energia": 0,
         }
         for bid, name in buyers.items()
     }
@@ -740,6 +833,7 @@ def build_site(
         b = buyer_stats[rec["comprador_id"]]
         b["procedimientos"] += 1
         b["abiertas"] += rec["estatus"] == "abierta"
+        b["energia"] += rec.get("sector") == "energia"
         b["categorias"][rec["categoria"]] += 1
         if rec.get("entidad"):
             b["entidades"][rec["entidad"]] += 1
@@ -758,6 +852,7 @@ def build_site(
                 "procedimientos": b["procedimientos"],
                 "abiertas": b["abiertas"],
                 "adjudicado": round(b["adjudicado"], 2),
+                "sector": "energia" if b["energia"] * 2 > b["procedimientos"] else "general",
                 "categorias": b["categorias"].most_common(6),
                 "proveedores": [
                     (k, company_names.get(k, k), n) for k, n in b["proveedores"].most_common(10)
@@ -768,13 +863,18 @@ def build_site(
     write_json(out / "compradores.json", buyer_list)
 
     # Ganadores recientes.
-    recientes = [a for a in awards if a["ganadores"]][:400]
+    recientes = [a for a in awards if a["ganadores"]][:600]
+    recientes_energia = [a for a in awards if a["ganadores"] and a["sector"] == "energia"][:300]
+    recientes += [a for a in recientes_energia if a not in recientes]
     since_year = (today - timedelta(days=365)).isoformat()
     top_year: Counter[str] = Counter()
+    top_year_energy: Counter[str] = Counter()
     for a in awards:
-        if (a["fecha"] or "") >= since_year:
+        if (a["fecha"] or "") >= since_year and not a["atipico"]:
             for key in a["empresas"]:
                 top_year[key] += a["monto_mxn"] / max(len(a["empresas"]), 1)
+                if a["sector"] == "energia":
+                    top_year_energy[key] += a["monto_mxn"] / max(len(a["empresas"]), 1)
     write_json(
         out / "ganadores.json",
         {
@@ -793,6 +893,7 @@ def build_site(
                         "fuente",
                         "categoria",
                         "entidad",
+                        "sector",
                     )
                 }
                 for a in recientes
@@ -800,6 +901,10 @@ def build_site(
             "top_anual": [
                 {"id": k, "nombre": company_names.get(k, k), "monto": round(v, 2)}
                 for k, v in top_year.most_common(25)
+            ],
+            "top_anual_energia": [
+                {"id": k, "nombre": company_names.get(k, k), "monto": round(v, 2)}
+                for k, v in top_year_energy.most_common(25)
             ],
         },
     )
@@ -811,6 +916,7 @@ def build_site(
 
     # Meta.
     counts = Counter(r["fuente"] for r in procs.values())
+    open_by_cat = Counter(r["categoria"] for r in open_recs)
     open_counts = Counter(r["fuente"] for r in open_recs)
     new_today = sum(1 for r in open_recs if r.get("primera_vez") == today.isoformat())
     closing = sum(
@@ -851,12 +957,26 @@ def build_site(
             for f in SOURCE_LABELS
         },
         "categorias": [
-            {"codigo": c, "nombre": n, "abiertas": sum(1 for r in open_recs if r["categoria"] == c)}
+            {
+                "codigo": c,
+                "nombre": n,
+                "grupo": groups.get(c, "general"),
+                "abiertas": open_by_cat.get(c, 0),
+            }
             for c, n in names.items()
         ],
+        "sectores": {
+            "energia": {
+                "abiertas": sum(1 for r in open_recs if r.get("sector") == "energia"),
+                "procedimientos": sum(1 for r in procs.values() if r.get("sector") == "energia"),
+            },
+            "todos": {"abiertas": len(open_recs), "procedimientos": len(procs)},
+        },
+        "comprasmx_faltantes": data["comprasmx_faltantes"],
         "compradores": {b["id"]: b["nombre"] for b in buyer_list},
         "estatus": STATUS_LABELS,
-        "anios": sorted(by_year, reverse=True),
+        "anios": years_index,
+        "indice_archivos": sorted(f"{y}-{sec}" for y, sec in by_year),
         "entidades": sorted({r["entidad"] for r in procs.values() if r.get("entidad")}),
         "fix": {"fecha": fix_last, "valor": data["fix"].get(fix_last)} if fix_last else None,
         "pemex_dias_abierta": pemex.OPEN_DAYS,

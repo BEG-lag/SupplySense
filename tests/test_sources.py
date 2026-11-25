@@ -107,7 +107,7 @@ def _csv(rows):
     return ("\n".join(lines) + "\n").encode("latin-1", errors="replace")
 
 
-def test_comprasmx_expedientes_filters_scope_and_drops_officials(tmp_path):
+def test_comprasmx_expedientes_marks_energy_and_drops_officials(tmp_path):
     rows = [
         EXP_HEADER,
         [
@@ -158,7 +158,8 @@ def test_comprasmx_expedientes_filters_scope_and_drops_officials(tmp_path):
     path = tmp_path / "Expedientes_ComprasMX_2026.csv"
     path.write_bytes(_csv(rows))
     recs = comprasmx.parse_file(path, "expedientes")
-    assert [r["id"] for r in recs] == ["cmx:E-2026-1"]
+    assert [r["id"] for r in recs] == ["cmx:E-2026-1", "cmx:E-2026-2"]
+    assert recs[1]["motivo_alcance"] is None  # IMSS: todos los giros, fuera de la vertical
     rec = recs[0]
     assert rec["estatus"] == "abierta"
     assert rec["apertura"] == "2026-11-30T11:00:00"

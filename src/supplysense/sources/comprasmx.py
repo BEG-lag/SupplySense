@@ -2,9 +2,10 @@
 
 Los archivos responden a GET sin navegador en una URL estable por año. Vienen en latin-1 con
 secuencias UTF-8 sueltas (``text.decode_mixed``). Las columnas se leen por nombre, nunca por
-posición, y solo se guardan los registros de compradores de energía o con palabras de
-contexto energético (``rules.scope_reason``). No se guardan el nombre ni el correo del
-operador del anuncio: son datos de servidores públicos que el sitio no necesita.
+posición. Se leen todos los giros; ``motivo_alcance`` marca los que forman la vertical de
+energía y O&G. Estos archivos son fotos completas de cada año: no se guardan en git, se bajan
+cada día y solo se registra cuándo vimos cada registro por primera vez. No se leen el nombre
+ni el correo del operador del anuncio: son datos de servidores públicos que el sitio no usa.
 """
 
 from __future__ import annotations
@@ -86,8 +87,6 @@ def parse_expediente(row: dict[str, str]) -> dict[str, Any] | None:
     institucion = clean(row.get("institucion"))
     siglas = clean(row.get("siglas de la institucion"))
     motivo = scope_reason(institucion, siglas, f"{titulo or ''} {descripcion or ''}")
-    if not motivo:
-        return None
     estatus_fuente = clean(row.get("estatus procedimiento"))
     tipo_contratacion = clean(row.get("tipo de contratacion"))
     return {
@@ -128,8 +127,6 @@ def parse_contrato(row: dict[str, str]) -> dict[str, Any] | None:
     institucion = clean(row.get("institucion"))
     siglas = clean(row.get("siglas de la institucion"))
     motivo = scope_reason(institucion, siglas, f"{titulo or ''} {descripcion or ''}")
-    if not motivo:
-        return None
     rfc = clean(row.get("rfc"))
     tipo_contratacion = clean(row.get("tipo de contratacion"))
     expediente = clean(row.get("codigo del expediente"))

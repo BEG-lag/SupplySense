@@ -2,10 +2,10 @@
 
 <p><a href="README.md">English</a> · <b>Español</b></p>
 
-**Licitaciones de energía y O&G en México, con lo que ya se pagó por lo mismo.** Cada mañana
-SupplySense lee las convocatorias abiertas de CFE, PEMEX y el sector energía en ComprasMX, y las
-cruza con diez años de adjudicaciones: quién ganó, a qué precio y para qué comprador. Cada
-registro liga a su fuente oficial.
+**Licitaciones del gobierno de México, con lo que ya se pagó por lo mismo.** Cada mañana
+SupplySense lee todas las convocatorias abiertas del gobierno federal en ComprasMX, más CFE y
+PEMEX, y las cruza con más de 300 mil adjudicaciones: quién ganó, a qué precio y para qué
+comprador. Energía y O&G es su vertical destacada. Cada registro liga a su fuente oficial.
 
 **Sitio:** [beg-lag.github.io/SupplySense](https://beg-lag.github.io/SupplySense/) ·
 **Feed:** [`feed.xml`](https://beg-lag.github.io/SupplySense/data/feed.xml) ·
@@ -16,7 +16,7 @@ registro liga a su fuente oficial.
 | # | Sección | Estatus |
 |---|---|---|
 | 1 | [Qué hace](#1-qué-hace) | VERDE |
-| 2 | [Fuentes](#2-fuentes) | VERDE (Campeche estatal: AMARILLO) |
+| 2 | [Fuentes](#2-fuentes) | VERDE (compras estatales con recursos propios: AMARILLO) |
 | 3 | [Cómo funciona](#3-cómo-funciona) | VERDE |
 | 4 | [Decisiones de datos y privacidad](#4-decisiones-de-datos-y-privacidad) | VERDE |
 | 5 | [Correr en local](#5-correr-en-local) | VERDE |
@@ -25,12 +25,13 @@ registro liga a su fuente oficial.
 
 ## 1. Qué hace
 
-- **Buscar convocatorias abiertas** por lo que vendes, con filtros por fuente, comprador,
-  estado, categoría y estatus. Los filtros viven en la URL, así que una búsqueda se comparte.
+- **Buscar convocatorias abiertas** por lo que vendes, con filtros por sector, fuente,
+  comprador, estado, categoría y estatus. Los filtros viven en la URL, así que una búsqueda se comparte.
 - **Ver el detalle** de cada procedimiento: fechas de junta, apertura y fallo, comprador, liga a
   la fuente y, lo propio de SupplySense, **cuánto se ha pagado en su categoría** y **qué
   procedimientos parecidos ya se adjudicaron, a quién y por cuánto**.
-- **Precios por categoría**: percentiles (P5 a P95) de más de 90 mil adjudicaciones, serie anual,
+- **Precios por categoría** (35, en tres grupos: energía y O&G, salud y general): percentiles
+  (P5 a P95) de más de 300 mil adjudicaciones, serie anual,
   concentración del mercado (HHI) y un comparador para ubicar un monto. No calcula
   "probabilidad de ganar".
 - **Ganadores, empresas y compradores**: adjudicaciones recientes, historial de cada empresa y a
@@ -44,9 +45,9 @@ registro liga a su fuente oficial.
 |---|---|---|
 | CFE, Micrositio de Concursos | VERDE | Unos 115 mil procedimientos desde 2015 con estatus, ganador y monto; de los vigentes, fechas de apertura y fallo |
 | PEMEX, concursos abiertos | VERDE | Unos 12 mil avisos por segmento; PEMEX no publica fecha límite, monto ni ganador |
-| ComprasMX, datos abiertos | VERDE | Expedientes y contratos 2025 y 2026 de IMP, CENACE, CENAGAS, SENER, INEEL, ASEA, CNE y CONUEE |
+| ComprasMX, datos abiertos | VERDE | Todos los expedientes (unos 180 mil) y contratos (unos 220 mil) 2025 y 2026 del gobierno federal y de estados y municipios con dinero federal |
 | Tipo de cambio FIX | VERDE | Del repo [indicadores-mx](https://github.com/BEG-lag/indicadores-mx), para contratos en dólares |
-| Campeche, compras estatales propias | AMARILLO | Hoy se cubre con el filtro de entidad; el canal estatal no está integrado |
+| Compras estatales y municipales con recursos propios | AMARILLO | Portales locales aún no integrados |
 
 El detalle de cada endpoint, formato y rareza está en [`docs/fuentes.md`](docs/fuentes.md).
 
@@ -55,7 +56,8 @@ El detalle de cada endpoint, formato y rareza está en [`docs/fuentes.md`](docs/
 ```
 GitHub Actions (06:30 CDMX)
   → supplysense update   lee CFE, PEMEX, ComprasMX y FIX, cada fuente aislada
-  → data/*.jsonl         registros por mes, ordenados, versionados en git
+  → data/*.jsonl         CFE y PEMEX por mes, versionados en git
+  → data/vistos/*.tsv    ComprasMX: solo cuándo se vio cada registro (sus archivos van en caché)
   → supplysense build    reglas, estados unificados, DuckDB para percentiles
   → web/public/data      JSON para el sitio y feeds Atom
   → Vite + React         sitio estático en GitHub Pages
@@ -106,7 +108,8 @@ Pruebas: `uv run pytest`, `uv run ruff check .`, `cd web && npm test`.
 
 - La clasificación por categoría es por palabras clave: orienta, no es infalible.
 - Un monto de CFE es por procedimiento y puede cubrir varias partidas o ganadores.
-- ComprasMX solo cubre 2025 y 2026; el histórico de precios viene sobre todo de CFE.
+- ComprasMX cubre 2025 y 2026; el histórico más largo de precios es el de CFE (desde 2015).
+- El build lee unos 530 mil registros: tarda unos 4 minutos y usa unos 3.5 GB de memoria.
 - [SUPUESTO] Los 30 días de "abierto" de PEMEX son una estimación; confirma fechas en SISCeP.
 
 ## 7. Licencia y aviso

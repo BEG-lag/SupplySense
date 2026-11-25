@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { Area, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import PriceRange from '../components/PriceRange.jsx'
 import { useJson } from '../lib/data.js'
@@ -9,40 +9,55 @@ import { describePercentile, percentileOf } from '../lib/prices.js'
 import { Card, ErrorNote, Input, Loading, PageHeader, Section, Stat } from '../ui/index.jsx'
 import { displayTitle } from '../lib/text.js'
 
+const GROUPS = [['energia', 'Energía y O&G'], ['salud', 'Salud'], ['general', 'General']]
+
 export function PricesIndex() {
   const { data, error, loading } = useJson('precios.json')
   const rows = useMemo(() => (data ? [...data].sort((a, b) => b.n - a.n) : []), [data])
   const max = rows.reduce((m, r) => Math.max(m, r.p75), 1)
+  const { hash } = useLocation()
+  useEffect(() => {
+    if (hash && rows.length) document.getElementById(hash.slice(1))?.scrollIntoView()
+  }, [hash, rows.length])
   return (
     <>
       <PageHeader eyebrow="Precios" title="Cuánto se paga en cada categoría">
-        Montos adjudicados por procedimiento (CFE) o por contrato (ComprasMX) en los últimos 36
-        meses, sin montos atípicos. La caja va del percentil 25 al 75 y la línea marca la mediana.
+        Montos adjudicados por contrato (ComprasMX) o por procedimiento (CFE) en los últimos 36
+        meses, sin montos atípicos. La barra va del percentil 25 al 75 y la línea marca la mediana.
       </PageHeader>
       {loading && <Loading />}
       {error && <ErrorNote error={error} />}
-      <div className="overflow-hidden rounded-xl border border-line">
-        <ul className="divide-y divide-line">
-          {rows.map((r) => (
-            <li key={r.codigo}>
-              <Link to={`/precios/${r.codigo}`} className="grid grid-cols-1 gap-2 px-4 py-3.5 hover:bg-subtle sm:grid-cols-[1fr_1.4fr_auto] sm:items-center sm:gap-6">
-                <div>
-                  <div className="font-medium">{r.nombre}</div>
-                  <div className="text-xs text-ink-3"><span className="num">{formatNumber(r.n)}</span> adjudicaciones</div>
-                </div>
-                <div className="relative h-2.5 rounded-full bg-muted" aria-hidden>
-                  <div className="absolute inset-y-0 rounded-full" style={{ left: `${(Math.log10(r.p25) / Math.log10(max)) * 100}%`, width: `${((Math.log10(r.p75) - Math.log10(r.p25)) / Math.log10(max)) * 100}%`, background: 'var(--chart-2)' }} />
-                  <div className="absolute -inset-y-1 w-0.5" style={{ left: `${(Math.log10(r.p50) / Math.log10(max)) * 100}%`, background: 'var(--chart-1)' }} />
-                </div>
-                <div className="num text-sm sm:text-right">
-                  <span className="font-medium">{formatMXNShort(r.p50)}</span>
-                  <span className="text-ink-3"> mediana</span>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
+      {GROUPS.map(([key, label]) => {
+        const groupRows = rows.filter((r) => r.grupo === key)
+        if (!groupRows.length) return null
+        return (
+          <section key={key} id={key} className="mt-8 scroll-mt-24 first:mt-0">
+            <h2 className="eyebrow mb-3">{label}</h2>
+            <div className="overflow-hidden rounded-2xl border border-line">
+              <ul className="divide-y divide-line">
+                {groupRows.map((r) => (
+                  <li key={r.codigo}>
+                    <Link to={`/precios/${r.codigo}`} className="grid grid-cols-1 gap-2 px-4 py-3.5 hover:bg-subtle sm:grid-cols-[1fr_1.4fr_auto] sm:items-center sm:gap-6">
+                      <div>
+                        <div className="font-medium">{r.nombre}</div>
+                        <div className="text-xs text-ink-3"><span className="num">{formatNumber(r.n)}</span> adjudicaciones</div>
+                      </div>
+                      <div className="relative h-2.5 rounded-full bg-muted" aria-hidden>
+                        <div className="absolute inset-y-0 rounded-full" style={{ left: `${(Math.log10(r.p25) / Math.log10(max)) * 100}%`, width: `${((Math.log10(r.p75) - Math.log10(r.p25)) / Math.log10(max)) * 100}%`, background: 'var(--chart-2)' }} />
+                        <div className="absolute -inset-y-1 w-0.5" style={{ left: `${(Math.log10(r.p50) / Math.log10(max)) * 100}%`, background: 'var(--chart-1)' }} />
+                      </div>
+                      <div className="num text-sm sm:text-right">
+                        <span className="font-medium">{formatMXNShort(r.p50)}</span>
+                        <span className="text-ink-3"> mediana</span>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        )
+      })}
       <p className="mt-4 text-xs text-ink-3">Escala logarítmica. PEMEX no publica montos en datos abiertos, así que no entra en estos cálculos.</p>
     </>
   )

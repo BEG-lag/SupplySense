@@ -1,4 +1,4 @@
-"""Línea de comandos: ``supplysense update | build | stats | check``."""
+"""Línea de comandos: ``supplysense update | descargar | build | stats | check``."""
 
 from __future__ import annotations
 
@@ -37,6 +37,9 @@ def main(argv: list[str] | None = None) -> int:
     build.add_argument("--out", type=Path, default=Path("web/public/data"))
     build.add_argument("--today", type=_date, default=None)
 
+    desc = sub.add_parser("descargar", help="baja los archivos de ComprasMX que falten en caché")
+    desc.add_argument("--today", type=_date, default=None)
+
     sub.add_parser("stats", help="resumen de los datos guardados")
 
     chk = sub.add_parser("check", help="falla si una fuente lleva 3 días o más sin leerse")
@@ -64,6 +67,15 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  registros: {report.counts}")
         print(f"  archivos cambiados: {len(report.changed)}")
         return 1 if report.failed and not report.ok else 0
+
+    if args.command == "descargar":
+        from .http import PoliteClient
+        from .pipeline import CACHE_DIR, ensure_raw
+
+        with PoliteClient() as client:
+            got = ensure_raw(client, args.today or today_mx(), CACHE_DIR)
+        print(f"descargados: {', '.join(got) or 'ninguno (ya estaban en caché)'}")
+        return 0
 
     if args.command == "build":
         from .build import build_site

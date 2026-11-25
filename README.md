@@ -2,10 +2,10 @@
 
 <p><b>English</b> · <a href="README.es.md">Español</a></p>
 
-**Mexico's energy and oil & gas tenders, next to what was already paid for the same thing.**
-Every morning SupplySense reads the open calls for tender of CFE, PEMEX and the energy sector on
-ComprasMX, and matches them against ten years of awards: who won, at what price and for which
-buyer. Every record links to its official source.
+**Mexican government tenders, next to what was already paid for the same thing.** Every
+morning SupplySense reads every open federal call for tender on ComprasMX, plus CFE and PEMEX,
+and matches them against 300,000+ awards: who won, at what price and for which buyer. Energy
+and oil & gas is its featured vertical. Every record links to its official source.
 
 **Site:** [beg-lag.github.io/SupplySense](https://beg-lag.github.io/SupplySense/) (in Spanish) ·
 **Feed:** [`feed.xml`](https://beg-lag.github.io/SupplySense/data/feed.xml) ·
@@ -16,7 +16,7 @@ buyer. Every record links to its official source.
 | # | Section | Status |
 |---|---|---|
 | 1 | [What it does](#1-what-it-does) | GREEN |
-| 2 | [Sources](#2-sources) | GREEN (Campeche state channel: AMBER) |
+| 2 | [Sources](#2-sources) | GREEN (state-funded purchases: AMBER) |
 | 3 | [How it works](#3-how-it-works) | GREEN |
 | 4 | [Data and privacy decisions](#4-data-and-privacy-decisions) | GREEN |
 | 5 | [Run it locally](#5-run-it-locally) | GREEN |
@@ -25,12 +25,13 @@ buyer. Every record links to its official source.
 
 ## 1. What it does
 
-- **Search open tenders** by what you sell, filtering by source, buyer, state, category and
-  status. Filters live in the URL, so a search can be shared.
+- **Search open tenders** by what you sell, filtering by sector, source, buyer, state,
+  category and status. Filters live in the URL, so a search can be shared.
 - **Tender detail**: clarification meeting, bid opening and award dates, buyer, link to the
   source and, unique to SupplySense, **what has been paid in its category** and **which similar
   procedures were already awarded, to whom and for how much**.
-- **Prices by category**: percentiles (P5 to P95) of 90,000+ awards, yearly series, market
+- **Prices by category** (35, in three groups: energy and oil & gas, health and general):
+  percentiles (P5 to P95) of 300,000+ awards, yearly series, market
   concentration (HHI) and a comparator to place an amount. It does not claim a "probability of
   winning".
 - **Winners, companies and buyers**: recent awards, each company's history and who each agency
@@ -44,9 +45,9 @@ buyer. Every record links to its official source.
 |---|---|---|
 | CFE, Micrositio de Concursos | GREEN | ~115,000 procedures since 2015 with status, winner and amount; opening and award dates for open ones |
 | PEMEX, open tenders | GREEN | ~12,000 notices by segment; PEMEX publishes no deadline, amount or winner |
-| ComprasMX open data | GREEN | 2025 and 2026 procedures and contracts of IMP, CENACE, CENAGAS, SENER, INEEL, ASEA, CNE and CONUEE |
+| ComprasMX open data | GREEN | Every 2025 and 2026 procedure (~180,000) and contract (~220,000) of the federal government, and of states and municipalities spending federal funds |
 | FIX exchange rate | GREEN | From [indicadores-mx](https://github.com/BEG-lag/indicadores-mx), for USD contracts |
-| Campeche, state-funded purchases | AMBER | Covered through the state filter; the state channel is not integrated yet |
+| State and municipal purchases with their own funds | AMBER | Local portals not integrated yet |
 
 Endpoints, formats and quirks are documented in [`docs/fuentes.md`](docs/fuentes.md) (Spanish).
 
@@ -55,7 +56,8 @@ Endpoints, formats and quirks are documented in [`docs/fuentes.md`](docs/fuentes
 ```
 GitHub Actions (06:30 Mexico City)
   → supplysense update   reads CFE, PEMEX, ComprasMX and FIX, each source isolated
-  → data/*.jsonl         monthly, sorted, git-versioned records
+  → data/*.jsonl         CFE and PEMEX, monthly, git-versioned
+  → data/vistos/*.tsv    ComprasMX: only when each record was first seen (files live in cache)
   → supplysense build    rules, unified state names, DuckDB percentiles
   → web/public/data      JSON for the site and Atom feeds
   → Vite + React         static site on GitHub Pages
@@ -98,7 +100,8 @@ Tests: `uv run pytest`, `uv run ruff check .`, `cd web && npm test`.
 
 - Category classification is keyword-based: a guide, not ground truth.
 - A CFE amount is per procedure and may cover several line items or winners.
-- ComprasMX covers 2025 and 2026 only; the price history comes mostly from CFE.
+- ComprasMX covers 2025 and 2026; the longest price history is CFE's (since 2015).
+- The build reads ~530,000 records: about 4 minutes and 3.5 GB of memory.
 - The 30-day "open" window for PEMEX is an assumption; confirm dates in SISCeP.
 
 ## 7. License and notice

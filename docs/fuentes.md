@@ -6,7 +6,7 @@ Cada registro del sitio liga a su fuente oficial. Este documento dice de dónde 
 |---|---|---|---|
 | CFE, Micrositio de Concursos | VERDE | Convocatorias vigentes, ganadores y montos desde 2015 | 114,970 procedimientos; 608 vigentes en la fuente (406 con apertura aún por venir); 88,153 adjudicados con monto |
 | PEMEX, concursos abiertos | VERDE | Avisos de concursos de PEMEX por segmento | 11,926 avisos desde 2015; sin fecha límite, montos ni ganadores |
-| ComprasMX, datos abiertos | AMARILLO | Procedimientos y contratos de IMP, CENACE, CENAGAS, SENER, INEEL, ASEA, CNE y CONUEE | 2026: unos 1,100 procedimientos y 1,000 contratos de energía; unos 25 abiertos |
+| ComprasMX, datos abiertos | VERDE | Todos los procedimientos y contratos federales (y estatales con dinero federal) | 2025 y 2026: 183 mil expedientes y 222 mil contratos; unos 1,080 abiertos |
 | Campeche | AMARILLO | Filtro por entidad sobre las tres fuentes; el canal estatal propio no está identificado | [BRECHA DE DATO] |
 | Tipo de cambio FIX | VERDE | Conversión de contratos en dólares | Serie diaria desde 1991, del repo indicadores-mx |
 
@@ -32,7 +32,8 @@ Cada registro del sitio liga a su fuente oficial. Este documento dice de dónde 
 - **Codificación**: mayormente latin-1 con secuencias UTF-8 sueltas y algunas palabras corruptas desde el origen ("MONSEÃOR"). Se decodifica en modo mixto y se repara con una tabla.
 - **Expedientes** (38 columnas): estatus (ADJUDICADO, VIGENTE, EN APERTURA, EN ACLARACIONES, PENDIENTE DE APERTURA, DESIERTO, CANCELADO…), fechas de publicación, junta de aclaraciones, apertura y fallo, y `Dirección del anuncio` con la liga al detalle.
 - **Contratos** (73 columnas): proveedor, RFC, montos sin impuestos mínimo y máximo, moneda (MXN, USD, EUR), fechas de firma, inicio y fin.
-- **Límites**: CFE y PEMEX no publican aquí. En 2026 el filtro por institución de energía deja unos 1,100 procedimientos y 1,000 contratos.
+- **Límites**: CFE y PEMEX no publican aquí. La vertical de energía (IMP, CENACE, CENAGAS, SENER, INEEL, ASEA, CNE, CONUEE y palabras de contexto) es de unos 1,100 procedimientos y 1,000 contratos al año.
+- **Almacenamiento**: los archivos son fotos completas de cada año, así que no se guardan en git. Se bajan cada día (el año anterior, los lunes), se validan columnas y volumen antes de sustituir los de la caché de Actions, y en `data/vistos/` solo se registra cuándo se vio cada registro por primera vez.
 
 ## Campeche
 

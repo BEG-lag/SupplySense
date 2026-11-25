@@ -1,5 +1,8 @@
-"""Reglas versionadas en ``reglas/*.csv``: compradores de energía, alcance por palabras,
-categorías, estatus y correcciones manuales.
+"""Reglas versionadas en ``reglas/*.csv``: compradores de energía, palabras de contexto
+energético, categorías, estatus y correcciones manuales.
+
+SupplySense cubre todos los giros de las compras federales. ``scope_reason`` marca qué
+registros forman la vertical de energía y O&G (por comprador o por palabras de contexto).
 
 Las reglas viven en CSV para que cualquiera pueda leerlas y discutirlas sin leer código. Los
 patrones de alcance y categorías se aplican sobre texto sin acentos y en minúsculas.
@@ -32,6 +35,7 @@ class Buyer:
 class Category:
     codigo: str
     nombre: str
+    grupo: str
     incluir: re.Pattern[str]
     excluir: re.Pattern[str] | None
 
@@ -72,11 +76,18 @@ def categories(root: Path = RULES_DIR) -> tuple[Category, ...]:
         Category(
             r["codigo"],
             r["nombre"],
+            r["grupo"],
             re.compile(r["incluir"]),
             re.compile(r["excluir"]) if r["excluir"] else None,
         )
         for r in _rows("categorias.csv", root)
     )
+
+
+def category_groups(root: Path = RULES_DIR) -> dict[str, str]:
+    groups = {c.codigo: c.grupo for c in categories(root)}
+    groups[OTROS[0]] = "general"
+    return groups
 
 
 def category_names(root: Path = RULES_DIR) -> dict[str, str]:
@@ -104,7 +115,7 @@ def match_buyer(institucion: str | None, siglas: str | None = None) -> Buyer | N
 
 
 def scope_reason(institucion: str | None, siglas: str | None, texto: str | None) -> str | None:
-    """Por qué un registro entra al alcance de energía y O&G, o None si no entra."""
+    """Por qué un registro pertenece a la vertical de energía y O&G, o None si no."""
     buyer = match_buyer(institucion, siglas)
     if buyer:
         return f"comprador:{buyer.siglas}"
@@ -113,6 +124,10 @@ def scope_reason(institucion: str | None, siglas: str | None, texto: str | None)
         if pattern.search(folded):
             return f"palabra:{motivo}"
     return None
+
+
+def sector_of(motivo: str | None) -> str:
+    return "energia" if motivo else "general"
 
 
 def categorize(texto: str | None, tipo_contratacion: str | None = None) -> str:

@@ -57,4 +57,6 @@ def test_volumes_are_plausible(procs):
         by_source[rec["fuente"]] = by_source.get(rec["fuente"], 0) + 1
     assert by_source.get("cfe", 0) > 50_000
     assert by_source.get("pemex", 0) > 5_000
-    assert by_source.get("comprasmx", 0) > 500
+    # ComprasMX no se guarda completo: solo su índice de "vistos".
+    assert by_source.get("comprasmx", 0) == 0
+    assert len(store.load_seen(DATA)) > 50_000

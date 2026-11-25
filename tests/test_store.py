@@ -28,3 +28,11 @@ def test_empty_partitions_are_removed(tmp_path):
     changed = store.save("procedimientos", {"b": {"id": "b", "publicado": "2026-01-01"}}, tmp_path)
     assert any("borrado" in c for c in changed)
     assert set(store.load("procedimientos", tmp_path)) == {"b"}
+
+
+def test_seen_index_roundtrip(tmp_path):
+    seen = {"cmx:E-1": "2026-11-25", "cmx:E-2": "2026-10-01", "cmx:c:3": "2026-11-02"}
+    changed = store.save_seen(seen, tmp_path)
+    assert changed == ["vistos/2026-10.tsv", "vistos/2026-11.tsv"]
+    assert store.load_seen(tmp_path) == seen
+    assert store.save_seen(seen, tmp_path) == []

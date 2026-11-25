@@ -1,12 +1,13 @@
 {
-  "_validadores": {},
   "cfe": {
     "registros": 114976,
     "ultima_ok": "2026-11-25"
   },
   "comprasmx": {
-    "contratos": 2223,
-    "registros": 2018,
+    "archivos": {
+      "Contratos_ComprasMX_2026.csv": 92547,
+      "Expedientes_ComprasMX_2026.csv": 88103
+    },
     "ultima_ok": "2026-11-25"
   },
   "fix": {

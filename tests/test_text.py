@@ -7,6 +7,7 @@ from supplysense.text import (
     rfc_kind,
     split_winners,
     strip_rfcs,
+    title_name,
 )
 
 
@@ -68,3 +69,19 @@ def test_winner_rfcs_are_removed():
     assert split_winners(
         "COM120924MW7/SASD8108171M1/OCO200806KN5 - COMACAM SA DE CV,LICSA SA DE CV,"
     ) == ["COMACAM SA DE CV", "LICSA SA DE CV"]
+
+
+def test_title_name():
+    assert (
+        title_name("INSTITUTO MEXICANO DEL SEGURO SOCIAL") == "Instituto Mexicano del Seguro Social"
+    )
+    assert title_name("SECRETARÍA DE INFRAESTRUCTURA, COMUNICACIONES Y TRANSPORTES") == (
+        "Secretaría de Infraestructura, Comunicaciones y Transportes"
+    )
+    assert (
+        title_name("SERVICIOS DE SALUD (IMSS-BIENESTAR)") == "Servicios de Salud (IMSS-BIENESTAR)"
+    )
+    assert title_name("ALIMENTACIÓN PARA EL BIENESTAR, S.A. DE C.V.") == (
+        "Alimentación para el Bienestar, S.A. de C.V."
+    )
+    assert title_name("Ya en formato") == "Ya en formato"

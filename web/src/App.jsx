@@ -17,7 +17,7 @@ const PricesIndex = lazy(() => import('./pages/Prices.jsx').then((m) => ({ defau
 const PriceCategory = lazy(() => import('./pages/Prices.jsx').then((m) => ({ default: m.PriceCategory })))
 
 const TITLES = {
-  '/': 'SupplySense · Licitaciones de energía y O&G en México',
+  '/': 'SupplySense · Licitaciones del gobierno de México',
   '/buscar': 'Buscar · SupplySense',
   '/ganadores': 'Ganadores · SupplySense',
   '/precios': 'Precios · SupplySense',

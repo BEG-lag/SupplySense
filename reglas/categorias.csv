@@ -1,20 +1,36 @@
-codigo,nombre,incluir,excluir
-perforacion,Perforación y pozos,\bperforacion|\bpozos?\b|terminacion de pozo|reparacion de pozo|workover|\bbarrenas?\b|cementacion|registros geofisicos|tuberia de revestimiento|fluidos de perforacion,pozo de visita|pozo de absorcion|agua potable|pozo profundo de agua|pozos? de agua
-combustibles,Combustibles,\bdiesel|\bgasolina|turbosina|\bcombustible|gas l\.?p|gas licuado|combustoleo|suministro de gas natural|\bgas natural|\bcarbon (mineral|termico|no coquizable)|suministro de carbon,
-quimicos_lubricantes,Químicos y lubricantes,lubricante|aceite (industrial|lubricante|hidraulico|dielectrico|aislante)|\bgrasas?\b|\bquimic|reactivo|catalizador|inhibidor|biocida|demulsificante|\baditivo|solvente|\bglicol|\bmetanol|\bsosa\b|\baceites?\b|gases (industriales|medicinales)|\bnitrogeno|\boxigeno|\bhidrogeno|\bacetileno|\bresinas?\b,
-tuberia_ductos,Tubería y ductos,\btuberia|\btubos?\b|\bductos?\b|gasoducto|oleoducto|\bbridas?\b|conexiones de acero|\bniples?\b,
-valvulas,Válvulas,\bvalvula,
-compresion_bombeo,Compresores bombas y turbinas,\bcompresor|\bbombas?\b|\bturbinas?\b|turbogenerador|turbocompresor|motor(es)? (electrico|diesel|de combustion)|\bcalderas?\b|generador(es)? de vapor|torres? de enfriamiento|\bcondensador|intercambiador(es)? de calor,bomba de infusion
-equipo_electrico,Equipo y material eléctrico,transformador|\binterruptor|subestacion|\btableros?\b|apartarrayo|aislador|cuchillas?\b|restaurador|capacitor|\bmedidor|\bcables?\b|\bconductor(es)?\b|\bpostes?\b|herraje|\bconector|\belectric|alumbrado|luminaria|\bbaterias?\b,
-instrumentacion_control,Instrumentación y control,instrumentacion|control distribuido|\bscada\b|\bplc\b|\bmedicion|analizador|cromatograf|\bsensor|transmisor|automatizacion|telemetria,
-gruas_izaje,Grúas e izaje,\bgruas?\b|\bizaje|maniobras? de carga,montacarga|medic|tamizaje|grafic
-servicios_marinos,Servicios marinos y costa afuera,\bembarcacion|\bbuques?\b|\bbarcos?\b|remolcador|plataforma marina|costa afuera|offshore|\bmaritim|\bchalan|abastecedor|helicoptero|\bmarinas?\b,
-recubrimientos,Recubrimientos y anticorrosivos,\bpintura|recubrimiento|anticorros|galvaniz|epoxi|proteccion catodica,
-seguridad_ambiental,Seguridad industrial y ambiental,seguridad industrial|contraincendio|contra incendio|extintor|equipo de proteccion|\bepp\b|ropa de trabajo|calzado de seguridad|\bresiduos|ambiental|remediacion|\bderrame|monitoreo atmosferico|\bcalzado|proteccion personal,
-ti_telecom,Tecnología y telecomunicaciones,\bsoftware|\blicencias?\b|\bcomputo|informatic|telecomunicacion|\bradios?\b|fibra optica|red de datos|\bservidor|ciberseguridad|\bimpresora|\btoner,
-transporte_logistica,Transporte y logística,\btransporte|\bflete|arrendamiento de vehiculo|\bvehiculo|\bcamion|logistica|paqueteria|\btraslado|autobus,
-obra_construccion,Obra y construcción,\bconstruccion|\bedificacion|\bampliacion|pavimentacion|\bbarda|cimentacion|obra civil|\bobras?\b,mano de obra
-mantenimiento,Mantenimiento y refacciones,mantenimiento|\breparacion|refaccion|overhaul|rehabilitacion|conservacion|herramienta|consumibles industriales|\bllantas?\b|\bsellos?\b|\bempaques?\b|rodamiento|\bbaleros?\b|\bfiltros?\b|tornilleria|soldadura,
-servicios_profesionales,Servicios profesionales,consultoria|asesoria|\bestudios?\b|auditoria|ingenieria|capacitacion|supervision|dictamen|peritaje|\bcursos?\b|\banalisis\b|laboratorio|\bmuestreo|monitoreo,
-seguros,Seguros y fianzas,\bseguros?\b|\bpoliza|\bfianza,
-servicios_generales,Servicios generales,\blimpieza|vigilancia|\balimentos|papeleria|mobiliario|fumigacion|jardineria|comedor|uniformes|despensa|\bagua purificada|\bpapel\b|consumibles de oficina|articulos de oficina,
+codigo,nombre,grupo,incluir,excluir
+medicamentos,Medicamentos,salud,medicamento|\bfarmac|antibiotic|\bvacunas?\b|insulina|analgesic|antiinflamatori|solucion (salina|inyectable)|\bsueros?\b|ampolleta|inyectable|jarabe|biologicos|antiviral|antifungic|hemoderivad|oncologic|anticoagulant|antidiabetic|antihipertensiv|psicofarmac|antiretroviral,
+material_curacion,Material de curación y laboratorio,salud,material de curacion|\bgasas?\b|jeringa|sutura|guantes (de latex|de nitrilo|de exploracion|quirurgicos)|reactivos? (de laboratorio|para)|cubrebocas|\bvendas?\b|aposito|cateter|\bsondas?\b|insumos medicos|material medico|material de laboratorio|pruebas rapidas,
+equipo_medico,Equipo médico,salud,equipo medico|dispositivo medico|instrumental (quirurgico|medico)|desfibrilador|ventilador(es)? (medico|mecanico)|silla de ruedas|camilla|tomograf|resonancia magnetica|ultrasonido|endoscop|electrocardiograf|oximetr|autoclave|cama hospitalaria|rayos x|mastograf|equipo de laboratorio|equipo hospitalario|monitor de signos,
+servicios_salud,Servicios de salud,salud,hemodialisis|dialisis|laboratorio clinico|imagenologia|hospitalizacion|servicios? medicos?|atencion medica|servicios? de salud|enfermeria|terapia intensiva|banco de sangre|subrogad|estudios de laboratorio|\bcirugia|consulta medica,
+perforacion,Perforación y pozos petroleros,energia,\bperforacion|\bpozos?\b|terminacion de pozo|reparacion de pozo|workover|\bbarrenas?\b|cementacion de pozo|registros geofisicos|tuberia de revestimiento|fluidos de perforacion,pozo de visita|pozo de absorcion|agua potable|pozo profundo|pozos? de agua|perforacion de pozo para agua
+combustibles,Combustibles,energia,\bdiesel|\bgasolina|turbosina|\bcombustibles?\b|gas l\.?p|gas licuado|combustoleo|suministro de gas natural|\bgas natural|keroseno|\bvales? de gasolina|\bcarbon (mineral|termico|no coquizable)|suministro de carbon,
+servicios_financieros,Vales y servicios financieros,general,monederos? electronicos?|vales (de despensa|electronicos)|tarjetas? (de despensa|electronicas)|dispersion de|servicios? bancarios?|comision(es)? bancaria|servicio de pagos,
+quimicos_lubricantes,Químicos y lubricantes,energia,lubricante|\baceites?\b|\bgrasas?\b|\bquimic|catalizador|inhibidor|biocida|demulsificante|\baditivo|solvente|\bglicol|\bmetanol|\bsosa\b|gases (industriales|medicinales)|\bnitrogeno|\boxigeno|\bhidrogeno|\bacetileno|\bresinas?\b|\breactivos?\b,aceite comestible|aceite de cocina
+tuberia_ductos,Tubería y ductos,energia,\btuberia|\btubos?\b|\bductos?\b|gasoducto|oleoducto|\bbridas?\b|conexiones de acero|\bniples?\b,
+valvulas,Válvulas,energia,\bvalvula,
+compresion_bombeo,Compresores bombas y turbinas,energia,\bcompresor|\bbombas?\b|\bturbinas?\b|turbogenerador|turbocompresor|motor(es)? (electrico|diesel|de combustion)|\bcalderas?\b|generador(es)? de vapor|torres? de enfriamiento|\bcondensador|intercambiador(es)? de calor,bomba de infusion|bomba de insulina
+equipo_electrico,Equipo y material eléctrico,energia,transformador|\binterruptor|subestacion|\btableros?\b|apartarrayo|aislador|cuchillas?\b|restaurador|capacitor|\bmedidor|\bcables?\b|\bconductor(es)?\b|\bpostes?\b|herraje|\bconector|\belectric|alumbrado|luminaria|\bbaterias?\b|planta de emergencia|generador electrico,
+instrumentacion_control,Instrumentación y control,energia,instrumentacion|control distribuido|\bscada\b|\bplc\b|\bmedicion|analizador|cromatograf|\bsensor|transmisor|automatizacion|telemetria,
+gruas_izaje,Grúas e izaje,energia,\bgruas?\b|\bizaje|maniobras? de carga|montacarga,medic|tamizaje|grafic
+servicios_marinos,Servicios marinos y costa afuera,energia,\bembarcacion|\bbuques?\b|\bbarcos?\b|remolcador|plataforma marina|costa afuera|offshore|\bmaritim|\bchalan|abastecedor|helicoptero|\bmarinas?\b,
+recubrimientos,Recubrimientos y anticorrosivos,energia,\bpintura|recubrimiento|anticorros|galvaniz|epoxi|proteccion catodica|impermeabiliza,
+infraestructura_hidraulica,Infraestructura hidráulica,general,agua potable|\bdrenaje|alcantarillado|pozos? de agua|pozo profundo|planta (de tratamiento|potabilizadora)|red hidraulica|acueducto|\bcolector|tratamiento de agua|\bpotabiliza|desazolve,
+alimentos,Alimentos,general,\balimentos?\b|alimenticio|alimentari|\bviveres|despensa|\bracion|\bcomedor|cafeteria|\bfrutas?\b|verduras|lacteos|\bcarnes?\b|\bpan\b|agua purificada|abarrotes|perecederos|\bleche\b|tortilla|desayunos? escolar|\bcafe\b,
+vehiculos,Vehículos,general,\bvehiculos?\b|automovil|camioneta|motocicleta|ambulancia|\bautobus|pickup|tractocamion|\bremolques?\b|\bllantas?\b|neumatic|parque vehicular|\bcamion(es)?\b,
+uniformes_epp,Uniformes y equipo de protección,general,uniforme|ropa de trabajo|\bcalzado|vestuario|\btextil|\bprendas?\b|\bchalecos?\b|overol|\bbotas?\b|casco de seguridad|guantes de seguridad|equipo de proteccion|\bepp\b,
+seguridad_industrial,Seguridad industrial y protección civil,general,seguridad industrial|contraincendio|contra incendio|extintor|deteccion de (gas|humo|incendio)|proteccion civil|sistema contra,
+residuos_ambiental,Residuos y medio ambiente,general,\bresiduos|\bbasura|aguas residuales|impacto ambiental|remediacion|\bderrame|monitoreo (ambiental|atmosferico)|relleno sanitario|gestion ambiental|\bambiental,
+vigilancia,Vigilancia y seguridad privada,general,servicio de vigilancia|seguridad privada|\bguardias?\b|\bcustodia|videovigilancia|\bcctv\b|control de acceso|\balarmas?\b|seguridad (perimetral|patrimonial)|\bvigilancia,
+ti_telecom,Tecnología y telecomunicaciones,general,\bsoftware|\blicencias?\b|\bcomputo|computadora|laptop|\bservidor|hardware|red de datos|ciberseguridad|informatic|\bimpresora|escaner|\btoner|telecomunicacion|telefonia|\binternet|enlace de datos|fibra optica|radiocomunicacion|satelital|\bradios?\b|centro de datos|\bnube\b|tecnologias? de la informacion,
+transporte_logistica,Transporte y logística,general,\btransporte|\bflete|mudanza|paqueteria|mensajeria|logistica|\btraslado|acarreo|courier|autotransporte,
+arrendamiento,Arrendamiento,general,arrendamiento|\brenta de,
+obra_construccion,Obra y construcción,general,\bconstruccion|\bedificacion|\bampliacion|pavimentacion|\bbarda|cimentacion|obra civil|\bobras?\b|carretera|\bpuentes?\b|\bconcreto|\bcemento|remodelacion|urbanizacion|banqueta|terraceria|senalizacion|bacheo,mano de obra
+mantenimiento,Mantenimiento y refacciones,general,mantenimiento|\breparacion|refaccion|overhaul|rehabilitacion|conservacion|herramienta|consumibles industriales|\bsellos?\b|\bempaques?\b|rodamiento|\bbaleros?\b|\bfiltros?\b|tornilleria|soldadura,
+limpieza,Limpieza y jardinería,general,\blimpieza|\baseo\b|desinfeccion|fumigacion|jardineria|areas verdes|sanitizacion|higiene,
+papeleria_oficina,Papelería y oficina,general,papeleria|material de oficina|\bpapel\b|articulos de oficina|\butiles\b|consumibles de oficina|material didactico|\bimpresos?\b,
+mobiliario,Mobiliario,general,mobiliario|\bmuebles?\b|\bsillas?\b|escritorio|archivero|estanteria|\blockers?\b|butaca,
+capacitacion,Capacitación,general,capacitacion|\bcursos?\b|\btalleres?\b|seminario|diplomado|certificacion|adiestramiento|imparticion,
+publicidad_eventos,Publicidad y eventos,general,publicidad|\bdifusion|campana (publicitaria|de difusion|de comunicacion)|organizacion de eventos|logistica de eventos|servicios? de impresion|espectacular|medios de comunicacion,
+servicios_profesionales,Servicios profesionales,general,consultoria|asesoria|\bestudios?\b|auditoria|ingenieria|supervision|dictamen|peritaje|\banalisis\b|laboratorio|\bmuestreo|monitoreo|evaluacion|elaboracion de proyecto|proyecto ejecutivo,
+seguros,Seguros y fianzas,general,\bseguros?\b|\bpoliza|\bfianza,

@@ -33,8 +33,23 @@ jobs:
         with:
           enable-cache: true
 
+      # Los archivos de ComprasMX (fotos completas del año) viven en la caché de Actions, no en git.
+      - name: Recuperar archivos de ComprasMX
+        uses: actions/cache/restore@v6
+        with:
+          path: .cache/raw
+          key: comprasmx-raw-${{ github.run_id }}
+          restore-keys: comprasmx-raw-
+
       - name: Leer fuentes oficiales
         run: uv run --frozen supplysense -v update --detalles "${{ inputs.detalles || '150' }}"
+
+      - name: Guardar archivos de ComprasMX
+        if: always()
+        uses: actions/cache/save@v6
+        with:
+          path: .cache/raw
+          key: comprasmx-raw-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Validar el dataset
         run: uv run --frozen pytest -q tests/test_dataset.py

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useJson } from '../lib/data.js'
+import CategoryOptions from '../components/CategoryOptions.jsx'
 import { formatDate, formatMXNShort } from '../lib/format.js'
 import { buyerName, categoryName, SOURCE_NAMES, useMeta } from '../lib/meta.jsx'
 import { Card, ErrorNote, Loading, PageHeader, Pagination, Section, Select, Tag } from '../ui/index.jsx'
@@ -12,27 +13,33 @@ export default function Winners() {
   const { data: meta } = useMeta()
   const { data, error, loading } = useJson('ganadores.json')
   const [categoria, setCategoria] = useState('')
+  const [sector, setSector] = useState('')
   const [page, setPage] = useState(1)
   const rows = useMemo(
-    () => (data ? data.recientes.filter((a) => !categoria || a.categoria === categoria) : []),
-    [data, categoria],
+    () => (data ? data.recientes.filter((a) => (!categoria || a.categoria === categoria) && (!sector || a.sector === sector)) : []),
+    [data, categoria, sector],
   )
   if (loading || !meta) return <Loading />
   if (error) return <ErrorNote error={error} />
   const visible = rows.slice((page - 1) * PAGE, page * PAGE)
   return (
     <>
-      <PageHeader eyebrow="Ganadores" title="Quién acaba de ganar en el sector energía">
-        Las adjudicaciones más recientes de CFE y del sector energía en ComprasMX, con monto y
+      <PageHeader eyebrow="Ganadores" title="Quién acaba de ganar">
+        Las adjudicaciones más recientes del gobierno federal en ComprasMX y de CFE, con monto y
         comprador. Cada empresa tiene su historial.
       </PageHeader>
       <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
         <div className="min-w-0">
-          <div className="mb-3 flex items-center gap-3">
+          <div className="mb-3 flex flex-wrap items-center gap-3">
+            <label htmlFor="sec-g" className="text-sm text-ink-3">Sector</label>
+            <Select id="sec-g" className="max-w-[180px]" value={sector} onChange={(e) => { setSector(e.target.value); setPage(1) }}>
+              <option value="">Todos los giros</option>
+              <option value="energia">Energía y O&amp;G</option>
+            </Select>
             <label htmlFor="cat-g" className="text-sm text-ink-3">Categoría</label>
             <Select id="cat-g" className="max-w-xs" value={categoria} onChange={(e) => { setCategoria(e.target.value); setPage(1) }}>
               <option value="">Todas</option>
-              {meta.categorias.map((c) => <option key={c.codigo} value={c.codigo}>{c.nombre}</option>)}
+              <CategoryOptions meta={meta} />
             </Select>
           </div>
           <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line">
@@ -65,9 +72,9 @@ export default function Winners() {
           <Pagination page={page} pages={Math.ceil(rows.length / PAGE)} onPage={(p) => { setPage(p); window.scrollTo(0, 0) }} />
         </div>
         <aside>
-          <Section title="Más adjudicado en 12 meses" className="mt-0">
+          <Section title={sector === 'energia' ? 'Más adjudicado en energía (12 meses)' : 'Más adjudicado en 12 meses'} className="mt-0">
             <Card className="divide-y divide-line">
-              {data.top_anual.slice(0, 15).map((c, i) => (
+              {(sector === 'energia' ? data.top_anual_energia : data.top_anual).slice(0, 15).map((c, i) => (
                 <Link key={c.id} to={`/empresa/${c.id}`} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm hover:bg-subtle">
                   <span className="min-w-0 truncate"><span className="num mr-2 text-ink-3">{i + 1}</span>{c.nombre}</span>
                   <span className="num shrink-0 text-ink-2">{formatMXNShort(c.monto)}</span>

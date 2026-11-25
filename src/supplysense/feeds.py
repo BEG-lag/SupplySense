@@ -88,12 +88,20 @@ def all_feeds(
         "feed.xml": render(
             open_recs,
             title="SupplySense · convocatorias abiertas",
-            subtitle="Energía y O&G: CFE, PEMEX y ComprasMX, con liga a la fuente.",
+            subtitle="Compras públicas de México: ComprasMX, CFE y PEMEX, con liga a la fuente.",
             path="data/feed.xml",
             names=names,
             buyers=buyers,
         )
     }
+    feeds["feeds/energia.xml"] = render(
+        [r for r in open_recs if r.get("sector") == "energia"],
+        title="SupplySense · energía y O&G",
+        subtitle="Convocatorias abiertas de CFE, PEMEX y el sector energía.",
+        path="data/feeds/energia.xml",
+        names=names,
+        buyers=buyers,
+    )
     for fuente, label in SOURCES.items():
         feeds[f"feeds/{fuente}.xml"] = render(
             [r for r in open_recs if r["fuente"] == fuente],

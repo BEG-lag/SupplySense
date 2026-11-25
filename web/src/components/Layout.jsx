@@ -86,8 +86,8 @@ function Footer() {
         <div>
           <Brand />
           <p className="mt-4 leading-relaxed text-ink-2">
-            Licitaciones de energía y O&amp;G: convocatorias abiertas, ganadores y precios
-            históricos, cada uno con liga a su fuente oficial.
+            Licitaciones del gobierno de México, con una vertical de energía y O&amp;G:
+            convocatorias abiertas, ganadores y precios históricos, cada uno con liga a su fuente.
           </p>
           {meta && (
             <p className="eyebrow mt-4 flex items-center gap-2">
@@ -98,9 +98,9 @@ function Footer() {
         <div>
           <p className="eyebrow mb-3">Fuentes</p>
           <ul className="space-y-1.5">
+            <li><a className={link} href="https://comprasmx.buengobierno.gob.mx/datos-abiertos" rel="noreferrer" target="_blank">ComprasMX, datos abiertos</a></li>
             <li><a className={link} href="https://msc.cfe.mx/Aplicaciones/NCFE/Concursos/" rel="noreferrer" target="_blank">CFE, Micrositio de Concursos</a></li>
             <li><a className={link} href="https://www.pemex.com/procura/procedimientos-de-contratacion/concursosabiertos/Paginas/default.aspx" rel="noreferrer" target="_blank">PEMEX, concursos abiertos</a></li>
-            <li><a className={link} href="https://comprasmx.buengobierno.gob.mx/datos-abiertos" rel="noreferrer" target="_blank">ComprasMX, datos abiertos</a></li>
             <li><a className={link} href={feedUrl()}>Feed Atom de convocatorias</a></li>
           </ul>
         </div>

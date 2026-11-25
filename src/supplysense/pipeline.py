@@ -121,33 +121,50 @@ def update_pemex(
     return merge(procs, pemex.fetch(client), scope=lambda r: r["fuente"] == "pemex", today=today)
 
 
+def raw_path(cache_dir: Path, kind: str, year: int) -> Path:
+    return cache_dir / comprasmx.FILES[kind].format(year=year)
+
+
 def update_comprasmx(
     client: PoliteClient,
-    procs: dict[str, dict[str, Any]],
-    contracts: dict[str, dict[str, Any]],
+    seen: dict[str, str],
+    counts: dict[str, int],
     today: date,
     year: int,
     kind: str,
-    validators: dict[str, dict[str, str]],
     cache_dir: Path,
-) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
-    name = comprasmx.FILES[kind].format(year=year)
-    dest = cache_dir / name
-    new_validators = client.download(comprasmx.url(kind, year), dest, validators.get(name))
-    target = procs if kind == "expedientes" else contracts
-    already = any(r["fuente"] == "comprasmx" and r.get("archivo") == year for r in target.values())
-    if new_validators is None and already:
-        log.info("%s sin cambios (304)", name)
-        return procs, contracts
-    if new_validators is not None and any(new_validators.values()):
-        validators[name] = new_validators
-    fresh = comprasmx.parse_file(dest, kind)
-    for rec in fresh:
-        rec["archivo"] = year
-    scope = lambda r: r["fuente"] == "comprasmx" and r.get("archivo") == year  # noqa: E731
-    if kind == "expedientes":
-        return merge(procs, fresh, scope=scope, today=today), contracts
-    return procs, merge(contracts, fresh, scope=scope, today=today)
+) -> int:
+    """Baja el archivo del año, lo valida (columnas y volumen) y solo entonces sustituye al
+    anterior en la caché. Registra en ``seen`` los ids que no habíamos visto."""
+    dest = raw_path(cache_dir, kind, year)
+    tmp = dest.with_name(dest.name + ".nuevo")
+    client.download(comprasmx.url(kind, year), tmp)
+    try:
+        records = comprasmx.parse_file(tmp, kind)
+        previous = counts.get(dest.name, 0)
+        if previous >= 1000 and len(records) < previous * MIN_RATIO:
+            raise ValueError(f"freno: {dest.name} trae {len(records)} registros y había {previous}")
+    except Exception:
+        tmp.unlink(missing_ok=True)
+        raise
+    tmp.replace(dest)
+    for rec in records:
+        if rec["id"] not in seen:
+            seen[rec["id"]] = first_seen(None, rec, today)
+    counts[dest.name] = len(records)
+    return len(records)
+
+
+def ensure_raw(client: PoliteClient, today: date, cache_dir: Path) -> list[str]:
+    """Descarga los archivos de ComprasMX que falten en la caché (para el build)."""
+    got = []
+    for year in (today.year - 1, today.year):
+        for kind in ("expedientes", "contratos"):
+            dest = raw_path(cache_dir, kind, year)
+            if not dest.exists():
+                client.download(comprasmx.url(kind, year), dest)
+                got.append(dest.name)
+    return got
 
 
 def update(
@@ -165,16 +182,23 @@ def update(
     client = client or PoliteClient()
     procs = store.load("procedimientos", root)
     contracts = store.load("contratos", root)
+    seen = store.load_seen(root)
+    # Migración: ComprasMX ya no se guarda completo; se conserva su primera_vez en "vistos".
+    for collection in (procs, contracts):
+        for key in [k for k, r in collection.items() if r["fuente"] == "comprasmx"]:
+            seen.setdefault(key, collection.pop(key).get("primera_vez") or today.isoformat())
     estado_path = root / "estado_fuentes.json"
     estado: dict[str, Any] = store.load_json(estado_path, {})
-    validators: dict[str, dict[str, str]] = estado.setdefault("_validadores", {})
+    estado.pop("_validadores", None)
+    cmx_state = estado.setdefault("comprasmx", {})
+    counts: dict[str, int] = cmx_state.setdefault("archivos", {})
     if not years:
-        # El año anterior casi no cambia: se relee los lunes o si aún no está guardado.
-        have_previous = any(
-            r["fuente"] == "comprasmx" and r.get("archivo") == today.year - 1
-            for r in procs.values()
+        # El año anterior casi no cambia: se relee los lunes o si falta en la caché.
+        previous_cached = all(
+            raw_path(cache_dir, kind, today.year - 1).exists()
+            for kind in ("expedientes", "contratos")
         )
-        weekly = today.weekday() == 0 or not have_previous
+        weekly = today.weekday() == 0 or not previous_cached
         years = (today.year - 1, today.year) if weekly else (today.year,)
     try:
         if "cfe" in sources:
@@ -188,20 +212,17 @@ def update(
         if "comprasmx" in sources:
             for year in years:
                 for kind in ("expedientes", "contratos"):
-                    result = report.run(
+                    report.run(
                         f"comprasmx:{kind}:{year}",
                         update_comprasmx,
                         client,
-                        procs,
-                        contracts,
+                        seen,
+                        counts,
                         today,
                         year,
                         kind,
-                        validators,
                         cache_dir,
                     )
-                    if result is not None:
-                        procs, contracts = result
         if "fix" in sources:
             series = report.run("fix", fix.fetch, client)
             if series and store.save_json(root / "externos" / "fix.json", series):
@@ -212,6 +233,7 @@ def update(
 
     report.changed += store.save("procedimientos", procs, root)
     report.changed += store.save("contratos", contracts, root)
+    report.changed += store.save_seen(seen, root)
 
     for name in {n.split(":")[0] for n in (*report.ok, *report.failed)}:
         entry = estado.setdefault(name, {})
@@ -223,10 +245,12 @@ def update(
             entry.pop("falla_desde", None)
             entry.pop("error", None)
             entry["ultima_ok"] = today.isoformat()
-    for fuente in ("cfe", "pemex", "comprasmx"):
+    for fuente in ("cfe", "pemex"):
         report.counts[fuente] = sum(1 for r in procs.values() if r["fuente"] == fuente)
         estado.setdefault(fuente, {})["registros"] = report.counts[fuente]
-    estado.setdefault("comprasmx", {})["contratos"] = len(contracts)
+    report.counts["comprasmx"] = sum(counts.values())
+    cmx_state.pop("registros", None)
+    cmx_state.pop("contratos", None)
     if store.save_json(estado_path, estado):
         report.changed.append("estado_fuentes.json")
     return report

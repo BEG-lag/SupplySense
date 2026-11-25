@@ -150,3 +150,29 @@ def split_winners(value: str | None) -> list[str]:
         else:
             merged.append(part)
     return merged
+
+
+_CONNECTORS = {"de", "del", "la", "las", "los", "el", "y", "e", "para", "en", "a", "al", "o", "u"}
+_KEEP_UPPER = re.compile(
+    r"^(?:[A-Z]{1,3}|[A-Z0-9]*\d[A-Z0-9]*|I{1,3}|IV|VI{0,3}|IX|X{1,3}|[A-Z](?:\.[A-Z])+\.?)$"
+)
+
+
+def title_name(name: str | None) -> str | None:
+    """Nombre propio en mayúsculas → formato de nombre ("INSTITUTO MEXICANO DEL SEGURO SOCIAL"
+    → "Instituto Mexicano del Seguro Social"). Conserva siglas cortas y claves con números."""
+    if not name or not name.isupper():
+        return name
+    words = []
+    for i, word in enumerate(name.split()):
+        bare = word.strip(",;:()")
+        lower = word.lower()
+        if word.startswith("("):
+            words.append(word)  # siglas entre paréntesis: "(IMSS-BIENESTAR)"
+        elif i > 0 and bare.lower() in _CONNECTORS:
+            words.append(lower)
+        elif _KEEP_UPPER.match(bare) and bare.lower() not in _CONNECTORS:
+            words.append(word)
+        else:
+            words.append(lower[:1].upper() + lower[1:])
+    return " ".join(words)

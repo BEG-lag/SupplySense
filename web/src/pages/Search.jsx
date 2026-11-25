@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import CategoryOptions from '../components/CategoryOptions.jsx'
 import TenderTable from '../components/TenderTable.jsx'
 import { exportCSV } from '../lib/csv.js'
 import { loadJson, toRecords } from '../lib/data.js'
@@ -13,9 +14,18 @@ const PAGE = 25
 
 function yearsFor(filters, anio, meta) {
   if (filters.estatus === 'abierta') return []
+  const years = meta.anios.filter((y) => y !== '0000')
   if (anio === 'todos') return meta.anios
+  if (anio === 'dos') return years.slice(0, 2)
   if (anio) return [anio]
-  return meta.anios.slice(0, 2)
+  return years.slice(0, 1)
+}
+
+// Archivos del índice para esos años: solo la parte de energía si se filtra ese sector.
+function indexFiles(years, sector, meta) {
+  const sectors = sector === 'energia' ? ['energia'] : ['energia', 'general']
+  const available = new Set(meta.indice_archivos)
+  return years.flatMap((y) => sectors.map((sec) => `${y}-${sec}`)).filter((f) => available.has(f))
 }
 
 export default function Search() {
@@ -33,18 +43,23 @@ export default function Search() {
   useEffect(() => setQ(filters.q || ''), [filters.q])
 
   const years = meta ? yearsFor(filters, anio, meta) : null
-  const yearsKey = years ? years.join(',') : null
+  const filesKey = meta && years ? (years.length ? indexFiles(years, filters.sector, meta).join(',') : 'abiertas') : null
   useEffect(() => {
-    if (!meta || yearsKey == null) return undefined
+    if (!meta || filesKey == null) return undefined
     let alive = true
     setState({ records: null, error: null })
-    const files = yearsKey ? yearsKey.split(',').map((y) => `indice/${y}.json`) : ['abiertas.json']
+    const files = filesKey === 'abiertas' ? ['abiertas.json'] : filesKey.split(',').filter(Boolean).map((f) => `indice/${f}.json`)
     Promise.all(files.map(loadJson)).then(
-      (chunks) => alive && setState({ records: toRecords(chunks.flat(), meta.indice_campos), error: null }),
+      (chunks) => {
+        if (!alive) return
+        const records = toRecords(chunks.flat(), meta.indice_campos)
+        records.sort((a, b) => (b.publicado || '').localeCompare(a.publicado || '') || (a.id < b.id ? 1 : -1))
+        setState({ records, error: null })
+      },
       (error) => alive && setState({ records: null, error }),
     )
     return () => { alive = false }
-  }, [meta, yearsKey])
+  }, [meta, filesKey])
 
   const today = todayMx()
   const results = useMemo(
@@ -114,6 +129,10 @@ export default function Search() {
 
       <div className="grid gap-6 lg:grid-cols-[230px_1fr]">
         <aside className="grid grid-cols-2 content-start gap-3 sm:grid-cols-3 lg:grid-cols-1" aria-label="Filtros">
+          <Filter label="Sector" value={filters.sector} onChange={(v) => update({ sector: v })}>
+            <option value="">Todos los giros</option>
+            <option value="energia">Energía y O&amp;G</option>
+          </Filter>
           <Filter label="Estatus" value={filters.estatus} onChange={(v) => update({ estatus: v })}>
             <option value="">Todos</option>
             {['abierta', 'en_evaluacion', 'adjudicada', 'desierta', 'cancelada', 'aviso'].map((s) => <option key={s} value={s}>{meta.estatus[s]}</option>)}
@@ -124,7 +143,7 @@ export default function Search() {
           </Filter>
           <Filter label="Categoría" value={filters.categoria} onChange={(v) => update({ categoria: v })}>
             <option value="">Todas</option>
-            {meta.categorias.map((c) => <option key={c.codigo} value={c.codigo}>{c.nombre}</option>)}
+            <CategoryOptions meta={meta} />
           </Filter>
           <Filter label="Comprador" value={filters.comprador} onChange={(v) => update({ comprador: v })}>
             <option value="">Todos</option>
@@ -136,7 +155,8 @@ export default function Search() {
           </Filter>
           {filters.estatus !== 'abierta' && (
             <Filter label="Año de publicación" value={anio} onChange={(v) => update({ anio: v })}>
-              <option value="">Últimos dos</option>
+              <option value="">Año en curso</option>
+              <option value="dos">Últimos dos</option>
               {meta.anios.filter((y) => y !== '0000').map((y) => <option key={y} value={y}>{y}</option>)}
               <option value="todos">Todos (más lento)</option>
             </Filter>

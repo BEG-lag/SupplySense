@@ -1,18 +1,35 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import TenderTable from '../components/TenderTable.jsx'
 import { toRecords, useJson } from '../lib/data.js'
 import { formatMXNShort, formatNumber } from '../lib/format.js'
 import { categoryName, useMeta } from '../lib/meta.jsx'
-import { Card, Empty, ErrorNote, Loading, PageHeader, Section, Stat, Tag } from '../ui/index.jsx'
+import { Card, Empty, ErrorNote, Input, Loading, PageHeader, Section, Select, Stat, Tag } from '../ui/index.jsx'
+import { fold } from '../lib/search.js'
 
 export function BuyersIndex() {
   const { data, error, loading } = useJson('compradores.json')
+  const [sector, setSector] = useState('')
+  const [q, setQ] = useState('')
+  const rows = useMemo(() => {
+    if (!data) return []
+    const words = fold(q).split(/\s+/).filter(Boolean)
+    return data.filter((b) => (!sector || b.sector === sector) && words.every((w) => fold(b.nombre).includes(w)))
+  }, [data, sector, q])
   return (
     <>
-      <PageHeader eyebrow="Compradores" title="Quién compra en el sector energía">
-        Empresas de CFE, segmentos de PEMEX y dependencias del sector en ComprasMX.
+      <PageHeader eyebrow="Compradores" title="Quién compra">
+        Dependencias y entidades federales en ComprasMX, empresas de CFE y segmentos de PEMEX.
       </PageHeader>
+      <div className="mb-4 flex flex-wrap gap-3">
+        <label htmlFor="q-comp" className="sr-only">Buscar comprador</label>
+        <Input id="q-comp" className="max-w-sm" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Nombre o siglas" />
+        <label htmlFor="sec-comp" className="sr-only">Sector</label>
+        <Select id="sec-comp" className="max-w-[200px]" value={sector} onChange={(e) => setSector(e.target.value)}>
+          <option value="">Todos los giros</option>
+          <option value="energia">Energía y O&amp;G</option>
+        </Select>
+      </div>
       {loading && <Loading />}
       {error && <ErrorNote error={error} />}
       {data && (
@@ -22,7 +39,7 @@ export function BuyersIndex() {
               <tr><th className="px-4 py-2 font-medium">Comprador</th><th className="px-4 py-2 text-right font-medium">Abiertas</th><th className="px-4 py-2 text-right font-medium">Procedimientos</th><th className="px-4 py-2 text-right font-medium">Adjudicado</th></tr>
             </thead>
             <tbody className="divide-y divide-line">
-              {data.map((b) => (
+              {rows.slice(0, 200).map((b) => (
                 <tr key={b.id}>
                   <td className="px-4 py-2.5"><Link to={`/comprador/${b.id}`} className="font-medium hover:text-accent">{b.nombre}</Link></td>
                   <td className="num px-4 py-2.5 text-right">{b.abiertas ? formatNumber(b.abiertas) : <span className="text-ink-3">0</span>}</td>
@@ -34,6 +51,7 @@ export function BuyersIndex() {
           </table>
         </div>
       )}
+      {rows.length > 200 && <p className="eyebrow mt-3">Se muestran 200 de {formatNumber(rows.length)}: busca por nombre o siglas para ver el resto.</p>}
     </>
   )
 }

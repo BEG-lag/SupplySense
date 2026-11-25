@@ -22,6 +22,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
         with:
@@ -34,6 +35,14 @@ jobs:
           node-version: 24
           cache: npm
           cache-dependency-path: web/package-lock.json
+      - name: Recuperar archivos de ComprasMX
+        uses: actions/cache/restore@v6
+        with:
+          path: .cache/raw
+          key: comprasmx-raw-latest
+          restore-keys: comprasmx-raw-
+      - name: Bajar los que falten
+        run: uv run --frozen supplysense descargar
       - name: Generar datos del sitio
         run: uv run --frozen supplysense build --out web/public/data
       - name: Compilar

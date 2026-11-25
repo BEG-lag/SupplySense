@@ -72,7 +72,9 @@ def _fixture(root):
 def test_build_site_end_to_end(tmp_path):
     root, out = tmp_path / "data", tmp_path / "site"
     _fixture(root)
-    summary = build_site(root, out, today=TODAY, cache_dir=tmp_path / "cache")
+    summary = build_site(
+        root, out, today=TODAY, cache_dir=tmp_path / "cache", raw_dir=tmp_path / "raw"
+    )
     assert summary["procedimientos"] == 43
     meta = json.loads((out / "meta.json").read_text())
     fields = meta["indice_campos"]
@@ -99,7 +101,7 @@ def test_build_site_end_to_end(tmp_path):
 def test_no_personal_rfc_in_outputs(tmp_path):
     root, out = tmp_path / "data", tmp_path / "site"
     _fixture(root)
-    build_site(root, out, today=TODAY, cache_dir=tmp_path / "cache")
+    build_site(root, out, today=TODAY, cache_dir=tmp_path / "cache", raw_dir=tmp_path / "raw")
     import re
 
     for path in out.rglob("*.json"):
@@ -125,3 +127,70 @@ def test_state_names_unified():
     assert state_name("VERACRUZ") == state_name("Veracruz de Ignacio de la Llave") == "Veracruz"
     assert state_name("MÉXICO") == "Estado de México"
     assert state_name("CAMPECHE") == "Campeche"
+
+
+def test_comprasmx_is_read_from_raw_cache_with_seen_dates(tmp_path):
+    from supplysense.build import load_comprasmx
+
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    header = [
+        "Orden de gobierno",
+        "Siglas de la Institución",
+        "Institución",
+        "Nombre de la UC",
+        "Código del expediente",
+        "Título del expediente",
+        "Tipo Procedimiento",
+        "Número de procedimiento/proyecto",
+        "Tipo de contratación",
+        "Entidad Federativa",
+        "Fecha publicación",
+        "Estatus procedimiento",
+        "Fecha apertura",
+        "Dirección del anuncio",
+    ]
+    row = [
+        "APF",
+        "IMSS",
+        "INSTITUTO MEXICANO DEL SEGURO SOCIAL",
+        "UC",
+        "E-2026-9",
+        "ADQUISICIÓN DE MEDICAMENTOS ONCOLÓGICOS",
+        "LICITACIÓN PÚBLICA",
+        "LA-9",
+        "ADQUISICIONES",
+        "JALISCO",
+        "2026-11-20 10:00:00",
+        "VIGENTE",
+        "2026-12-01 10:00:00",
+        "https://comprasmx.buengobierno.gob.mx/sitiopublico/#/sitiopublico/detalle/"
+        "0123456789abcdef0123456789abcdef/procedimiento",
+    ]
+    text = "\n".join(",".join(f'"{c}"' for c in r) for r in (header, row)) + "\n"
+    (raw / "Expedientes_ComprasMX_2026.csv").write_bytes(text.encode("latin-1"))
+    procs, contracts, missing = load_comprasmx(raw, {"cmx:E-2026-9": "2026-11-21"}, TODAY)
+    assert [p["id"] for p in procs] == ["cmx:E-2026-9"]
+    assert procs[0]["primera_vez"] == "2026-11-21"
+    assert procs[0]["motivo_alcance"] is None  # no es del sector energía
+    assert contracts == []
+    assert "Contratos_ComprasMX_2026.csv" in missing
+
+
+def test_public_record_shrinks_links():
+    from supplysense.build import public_record
+
+    rec = {
+        "id": "cmx:E-1",
+        "fuente": "comprasmx",
+        "comprador": "X",
+        "comprador_nombre": "X",
+        "url": "https://comprasmx.buengobierno.gob.mx/sitiopublico/#/sitiopublico/detalle/"
+        "0123456789abcdef0123456789abcdef/procedimiento",
+        "estatus_estimado": False,
+    }
+    out = public_record(rec)
+    assert out["anuncio"] == "0123456789abcdef0123456789abcdef"
+    assert "url" not in out
+    assert "comprador" not in out
+    assert "estatus_estimado" not in out

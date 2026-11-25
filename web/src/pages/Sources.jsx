@@ -16,8 +16,8 @@ const SOURCES = {
   },
   comprasmx: {
     url: 'https://comprasmx.buengobierno.gob.mx/datos-abiertos',
-    what: 'Expedientes y contratos 2025 y 2026 de IMP, CENACE, CENAGAS, SENER, INEEL, ASEA, CNE y CONUEE, y de otros compradores cuando el título habla de gasoductos, hidrocarburos, refinerías o plataformas.',
-    limits: 'CFE y PEMEX no publican en ComprasMX. Los archivos vienen en una codificación mixta que se corrige al leerlos.',
+    what: 'Todos los expedientes y contratos 2025 y 2026 de la Administración Pública Federal y de los estados y municipios cuando usan dinero federal: más de 800 compradores. Los de IMP, CENACE, CENAGAS, SENER, INEEL, ASEA, CNE y CONUEE, y los que hablan de gasoductos, hidrocarburos o refinerías, forman la vertical de energía.',
+    limits: 'CFE y PEMEX no publican en ComprasMX. Los archivos son fotos completas de cada año: se descargan cada día y no se guardan en el repositorio. Vienen en una codificación mixta que se corrige al leerlos.',
   },
 }
 
@@ -27,7 +27,7 @@ export default function Sources() {
   return (
     <>
       <PageHeader eyebrow="Fuentes y método" title="De dónde sale cada dato">
-        SupplySense no inventa ni estima convocatorias: reúne lo que publican CFE, PEMEX y ComprasMX,
+        SupplySense no inventa ni estima convocatorias: reúne lo que publican ComprasMX, CFE y PEMEX,
         lo ordena y lo cruza. Cada registro liga a su fuente oficial.
       </PageHeader>
 
@@ -57,7 +57,8 @@ export default function Sources() {
           <li>Cada mañana, un proceso automático (GitHub Actions) lee las tres fuentes. Si una falla, se conserva lo último bueno y se avisa al tercer día.</li>
           <li>Los registros se guardan en archivos de texto versionados: cada cambio de una fuente queda en el historial público del repositorio.</li>
           <li>Las reglas son archivos legibles: compradores del sector, palabras de contexto, categorías y correcciones manuales.</li>
-          <li>Los precios son percentiles del monto adjudicado por procedimiento (CFE) o por contrato (ComprasMX), en pesos. Los contratos en dólares se convierten con el tipo de cambio FIX del día de firma. Montos atípicos (arriba del percentil 99 de su categoría o debajo de $10,000) se excluyen.</li>
+          <li>Cada registro lleva una de 35 categorías, en tres grupos: energía y O&amp;G, salud y general. La vertical de energía reúne a CFE, PEMEX, las dependencias del sector y lo que menciona gasoductos, hidrocarburos o refinerías.</li>
+          <li>Los precios son percentiles del monto adjudicado por contrato (ComprasMX) o por procedimiento (CFE), en pesos. Los contratos en dólares se convierten con el tipo de cambio FIX del día de firma. Montos atípicos (arriba del percentil 99 de su categoría o debajo de $10,000) se excluyen.</li>
           <li>Los ganadores son públicos por ley y así se publican. El RFC solo se muestra para personas morales; el de personas físicas contiene su fecha de nacimiento y no se publica. Tampoco se guardan los nombres ni correos de los servidores públicos que operan los anuncios.</li>
         </ol>
       </Section>
@@ -66,7 +67,7 @@ export default function Sources() {
         <ul className="list-disc space-y-2 pl-5 text-[15px] leading-relaxed text-ink-2">
           <li>La clasificación por categoría es por palabras clave: es buena para orientarse, no infalible. Lo que no encaja queda en “Otros”.</li>
           <li>Un monto adjudicado por procedimiento puede cubrir varias partidas o ganadores; compárese con cuidado.</li>
-          <li>Campeche: hoy se cubre con el filtro de entidad sobre CFE y ComprasMX. El canal estatal de compras con recursos propios aún no está integrado.</li>
+          <li>Estados y municipios: solo aparecen sus compras con dinero federal (las que pasan por ComprasMX). Las que hacen con recursos propios se publican en portales locales que aún no están integrados.</li>
         </ul>
       </Section>
 

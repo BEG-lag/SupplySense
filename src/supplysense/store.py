@@ -83,3 +83,46 @@ def save_json(path: Path, value: Any) -> bool:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
     return True
+
+
+# ── Índice de "vistos" de ComprasMX ──────────────────────────────────────────
+# Los archivos de ComprasMX son fotos completas del año: no se guardan en git. Solo se guarda
+# cuándo vimos cada registro por primera vez, una línea "id<TAB>AAAA-MM-DD", en archivos por
+# mes de esa fecha. Una corrida nueva solo agrega líneas al mes en curso.
+
+SEEN_DIR = "vistos"
+
+
+def load_seen(root: Path = DATA_DIR) -> dict[str, str]:
+    seen: dict[str, str] = {}
+    base = root / SEEN_DIR
+    if not base.exists():
+        return seen
+    for path in sorted(base.glob("*.tsv")):
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if "\t" in line:
+                key, day = line.split("\t", 1)
+                seen[key] = day
+    return seen
+
+
+def save_seen(seen: dict[str, str], root: Path = DATA_DIR) -> list[str]:
+    base = root / SEEN_DIR
+    groups: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    for key, day in seen.items():
+        groups[day[:7]].append((key, day))
+    changed: list[str] = []
+    for month, items in groups.items():
+        path = base / f"{month}.tsv"
+        text = "".join(f"{k}\t{d}\n" for k, d in sorted(items))
+        if path.exists() and path.read_text(encoding="utf-8") == text:
+            continue
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+        changed.append(f"{SEEN_DIR}/{month}.tsv")
+    if base.exists():
+        for path in base.glob("*.tsv"):
+            if path.stem not in groups:
+                path.unlink()
+                changed.append(f"{SEEN_DIR}/{path.name} (borrado)")
+    return sorted(changed)

@@ -19,15 +19,25 @@ function Fact({ label, children }) {
   )
 }
 
+const CFE_URL = 'https://msc.cfe.mx/Aplicaciones/NCFE/Concursos/'
+const CMX_URL = (id) => `https://comprasmx.buengobierno.gob.mx/sitiopublico/#/sitiopublico/detalle/${id}/procedimiento`
+
+function officialUrl(rec) {
+  if (rec.fuente === 'cfe') return CFE_URL
+  if (rec.anuncio) return CMX_URL(rec.anuncio)
+  return rec.url || null
+}
+
 function OfficialLink({ rec }) {
   const [copied, setCopied] = useState(false)
   const copy = () => {
     navigator.clipboard?.writeText(rec.numero).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) })
   }
   const label = { cfe: 'Abrir el buscador de CFE', pemex: 'Ver en el portal de PEMEX', comprasmx: 'Ver en ComprasMX' }[rec.fuente]
+  const url = officialUrl(rec)
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {rec.url && <Button as="a" href={rec.url} target="_blank" rel="noreferrer">{label}</Button>}
+      {url && <Button as="a" href={url} target="_blank" rel="noreferrer">{label}</Button>}
       {rec.fuente !== 'comprasmx' && (
         <Button variant="secondary" onClick={copy}>{copied ? 'Número copiado' : 'Copiar número'}</Button>
       )}
@@ -129,7 +139,7 @@ export default function Tender() {
           <Fact label="RFC del proveedor">{rec.proveedor_rfc && <span className="num">{rec.proveedor_rfc}</span>}</Fact>
           <Fact label="Monto adjudicado">{rec.monto && <span className="num">{formatMXN(rec.monto)}{rec.moneda && rec.moneda !== 'MXN' ? ` ${rec.moneda}` : ''}</span>}</Fact>
           <Fact label="Testigo social">{rec.testigo_social ? 'Sí' : null}</Fact>
-          <Fact label="Por qué aparece aquí">{rec.motivo_alcance && rec.motivo_alcance.replace('comprador:', 'Comprador del sector: ').replace('palabra:', 'Palabra de contexto: ')}</Fact>
+          <Fact label="Sector">{rec.sector === 'energia' ? `Energía y O&G (${(rec.motivo_alcance || '').replace('comprador:', 'comprador del sector: ').replace('palabra:', 'palabra de contexto: ')})` : 'General'}</Fact>
           <Fact label="Fuente">{SOURCE_NAMES[rec.fuente]} · visto por primera vez el {formatDate(rec.primera_vez)}</Fact>
         </dl>
       </Section>
@@ -157,7 +167,10 @@ export default function Tender() {
       )}
 
       {rec.contratos?.length > 0 && (
-        <Section title="Contratos de este procedimiento">
+        <Section
+          title="Contratos de este procedimiento"
+          aside={rec.contratos_total ? <span className="eyebrow">Los {rec.contratos.length} de mayor monto de {rec.contratos_total} · total {formatMXNShort(rec.contratos_monto_total)}</span> : null}
+        >
           <div className="overflow-x-auto rounded-xl border border-line">
             <table className="w-full text-sm">
               <thead className="bg-subtle text-left text-xs text-ink-3">
