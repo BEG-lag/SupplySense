@@ -7,6 +7,7 @@ import { loadJson, toRecords } from '../lib/data.js'
 import { liveStatus, todayMx } from '../lib/dates.js'
 import { buyerName, categoryName, SOURCE_NAMES, useMeta } from '../lib/meta.jsx'
 import { useSaved } from '../lib/saved.js'
+import { inferCategories } from '../lib/giros.js'
 import { applyFilters, describeFilters, filtersFromParams } from '../lib/search.js'
 import { Button, Empty, ErrorNote, Input, Loading, PageHeader, Pagination, Select } from '../ui/index.jsx'
 
@@ -62,11 +63,19 @@ export default function Search() {
   }, [meta, filesKey])
 
   const today = todayMx()
-  const results = useMemo(
-    () => (state.records ? applyFilters(state.records, filters, { buyers: meta?.compradores, today }) : []),
+  const exact = params.get('exacto') === '1'
+  const giros = useMemo(() => (filters.q && !filters.categoria ? inferCategories(filters.q, meta) : new Set()), [filters.q, filters.categoria, meta])
+  const { results, viaGiro } = useMemo(() => {
+    if (!state.records) return { results: [], viaGiro: new Set() }
+    const opts = { buyers: meta?.compradores, today }
+    const direct = applyFilters(state.records, filters, opts)
+    if (exact || !giros.size) return { results: direct, viaGiro: new Set() }
+    const seen = new Set(direct.map((r) => r.id))
+    const { q: _q, ...rest } = filters
+    const extra = applyFilters(state.records, rest, opts).filter((r) => giros.has(r.categoria) && !seen.has(r.id))
+    return { results: [...direct, ...extra], viaGiro: new Set(extra.map((r) => r.id)) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [state.records, params.toString()],
-  )
+  }, [state.records, params.toString(), giros])
 
   const update = (changes) => {
     const next = new URLSearchParams(params)
@@ -185,9 +194,16 @@ export default function Search() {
           {state.records && results.length === 0 && (
             <Empty title="Sin resultados">Prueba con otras palabras o quita algún filtro.</Empty>
           )}
+          {filters.q && giros.size > 0 && (
+            <p className="mb-3 text-[13px] text-ink-2">
+              {exact
+                ? <>Solo coincidencias con tus palabras. <button type="button" className="text-accent underline-offset-4 hover:underline" onClick={() => update({ exacto: '' })}>Incluir el mismo giro</button></>
+                : <>Incluye <span className="num text-ink">{viaGiro.size}</span> del giro {[...giros].map((g) => categoryName(meta, g)).join(', ')} que no usan tus palabras. <button type="button" className="text-accent underline-offset-4 hover:underline" onClick={() => update({ exacto: '1' })}>Ver solo coincidencias</button></>}
+            </p>
+          )}
           {results.length > 0 && (
             <>
-              <TenderTable records={visible} showWinner={filters.estatus === 'adjudicada'} />
+              <TenderTable records={visible} showWinner={filters.estatus === 'adjudicada'} viaGiro={viaGiro} />
               <Pagination page={page} pages={pages} onPage={(p) => { update({ pagina: String(p) }); window.scrollTo(0, 0) }} />
             </>
           )}

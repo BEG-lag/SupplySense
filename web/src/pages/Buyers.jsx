@@ -4,8 +4,9 @@ import TenderTable from '../components/TenderTable.jsx'
 import { toRecords, useJson } from '../lib/data.js'
 import { formatMXNShort, formatNumber } from '../lib/format.js'
 import { categoryName, useMeta } from '../lib/meta.jsx'
-import { Card, Empty, ErrorNote, Input, Loading, PageHeader, Section, Select, Stat, Tag } from '../ui/index.jsx'
+import { Button, Card, Empty, ErrorNote, Input, Loading, PageHeader, Section, Select, Stat, Tag } from '../ui/index.jsx'
 import { fold } from '../lib/search.js'
+import FollowButton from '../components/FollowButton.jsx'
 
 export function BuyersIndex() {
   const { data, error, loading } = useJson('compradores.json')
@@ -72,7 +73,15 @@ export function Buyer() {
   return (
     <>
       <nav className="mb-4 text-[13px] text-ink-3"><Link to="/compradores" className="hover:text-ink">Compradores</Link> / {b.nombre}</nav>
-      <PageHeader title={b.nombre} actions={<Link to={`/buscar?comprador=${b.id}`} className="text-sm text-accent hover:underline">Buscar en su historial</Link>} />
+      <PageHeader
+        title={b.nombre}
+        actions={(
+          <>
+            <FollowButton tipo="comprador" id={b.id} nombre={b.nombre} />
+            <Button as={Link} size="sm" variant="secondary" to={`/buscar?comprador=${b.id}`}>Buscar en su historial</Button>
+          </>
+        )}
+      />
       <Card className="grid grid-cols-2 gap-6 bg-subtle p-6 sm:grid-cols-3">
         <Stat value={formatNumber(b.abiertas)} label="Convocatorias abiertas" />
         <Stat value={formatNumber(b.procedimientos)} label="Procedimientos registrados" />

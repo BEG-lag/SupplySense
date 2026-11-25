@@ -97,6 +97,13 @@ def category_names(root: Path = RULES_DIR) -> dict[str, str]:
 
 
 @cache
+def synonyms(root: Path = RULES_DIR) -> dict[str, str]:
+    """Palabras comunes que no están en los patrones ("patrullas" → vehículos), para la
+    búsqueda por giro del sitio."""
+    return {fold(r["termino"]): r["categoria"] for r in _rows("sinonimos.csv", root)}
+
+
+@cache
 def statuses(root: Path = RULES_DIR) -> dict[tuple[str, str], str]:
     return {(r["fuente"], r["estatus_fuente"]): r["estatus"] for r in _rows("estatus.csv", root)}
 

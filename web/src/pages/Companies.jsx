@@ -6,6 +6,7 @@ import { buyerName, categoryName, SOURCE_NAMES, useMeta } from '../lib/meta.jsx'
 import { fold } from '../lib/search.js'
 import { Card, Empty, ErrorNote, Input, Loading, PageHeader, Pagination, Section, Stat, Tag } from '../ui/index.jsx'
 import { displayTitle } from '../lib/text.js'
+import FollowButton from '../components/FollowButton.jsx'
 
 const PAGE = 40
 
@@ -75,7 +76,7 @@ export function Company() {
   return (
     <>
       <nav className="mb-4 text-[13px] text-ink-3"><Link to="/empresas" className="hover:text-ink">Empresas</Link> / {c.nombre}</nav>
-      <PageHeader title={c.nombre}>
+      <PageHeader title={c.nombre} actions={<FollowButton tipo="empresa" id={c.id} nombre={c.nombre} snapshot={{ n: c.n }} />}>
         {c.rfc && <span className="num mr-3">RFC {c.rfc}</span>}
         {c.otros_nombres.length > 0 && <span className="text-ink-3">También aparece como {c.otros_nombres.join(', ')}</span>}
       </PageHeader>

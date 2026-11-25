@@ -5,6 +5,7 @@ import { MetaProvider } from './lib/meta.jsx'
 import { Buyer, BuyersIndex } from './pages/Buyers.jsx'
 import { CompaniesIndex, Company } from './pages/Companies.jsx'
 import Home from './pages/Home.jsx'
+import { CategoryPage, StatePage, StatesIndex } from './pages/Places.jsx'
 import Saved from './pages/Saved.jsx'
 import Search from './pages/Search.jsx'
 import Sources from './pages/Sources.jsx'
@@ -24,6 +25,7 @@ const TITLES = {
   '/empresas': 'Empresas · SupplySense',
   '/compradores': 'Compradores · SupplySense',
   '/guardadas': 'Guardadas · SupplySense',
+  '/estados': 'Por estado · SupplySense',
   '/fuentes': 'Fuentes y método · SupplySense',
 }
 
@@ -57,6 +59,9 @@ export default function App() {
             <Route path="empresa/:id" element={<Company />} />
             <Route path="compradores" element={<BuyersIndex />} />
             <Route path="comprador/:id" element={<Buyer />} />
+            <Route path="estados" element={<StatesIndex />} />
+            <Route path="estado/:slug" element={<StatePage />} />
+            <Route path="giro/:codigo" element={<CategoryPage />} />
             <Route path="guardadas" element={<Saved />} />
             <Route path="fuentes" element={<Sources />} />
             <Route path="*" element={<NotFound />} />

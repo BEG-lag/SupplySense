@@ -54,3 +54,23 @@ def test_normalize_status():
     assert normalize_status("comprasmx", "ADJUDICADO PARCIAL") == "adjudicada"
     assert normalize_status("comprasmx", "ALGO NUEVO") == "otro"
     assert normalize_status("cfe", None) is None
+
+
+def test_synonyms_point_to_existing_categories():
+    from supplysense.rules import categories, synonyms
+
+    codes = {c.codigo for c in categories()}
+    assert synonyms()
+    assert set(synonyms().values()) <= codes
+
+
+def test_category_patterns_are_portable_to_javascript():
+    """El sitio compila estos patrones con RegExp: nada de sintaxis exclusiva de Python."""
+    from supplysense.rules import categories
+
+    for c in categories():
+        for pattern in (c.incluir.pattern, c.excluir.pattern if c.excluir else ""):
+            assert "(?P" not in pattern
+            assert "(?i" not in pattern
+            assert "\\A" not in pattern
+            assert "\\Z" not in pattern

@@ -1,5 +1,7 @@
 // Tabla de licitaciones: tabla en escritorio, tarjetas en celular. Recibe registros del índice.
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import { useJson } from '../lib/data.js'
 import { closingLabel, liveStatus, todayMx } from '../lib/dates.js'
 import { formatDate, formatMXNShort } from '../lib/format.js'
 import { buyerName, categoryName, SOURCE_NAMES, useMeta } from '../lib/meta.jsx'
@@ -13,14 +15,27 @@ function Status({ rec, meta, today }) {
   return <StatusBadge status={status} label={meta?.estatus?.[status] || status} estimated={rec.estatus_estimado} />
 }
 
+function PriceHint({ rec, prices }) {
+  const p = prices?.[rec.categoria]
+  if (!p || rec.estatus !== 'abierta' || rec.categoria === 'otros') return null
+  return (
+    <div className="mt-1.5 text-xs text-ink-3">
+      Se ha pagado en este giro: <span className="num text-ink-2">{formatMXNShort(p.p25)} a {formatMXNShort(p.p75)}</span>
+      <span className="hidden sm:inline"> · mediana <span className="num">{formatMXNShort(p.p50)}</span></span>
+    </div>
+  )
+}
+
 function Closing({ rec, today }) {
   const label = rec.estatus === 'abierta' ? closingLabel(rec.apertura, today) : null
   if (!label) return null
   return <Tag tone="warn">{label}</Tag>
 }
 
-export default function TenderTable({ records, showWinner = false }) {
+export default function TenderTable({ records, showWinner = false, viaGiro }) {
   const { data: meta } = useMeta()
+  const { data: priceList } = useJson('precios.json')
+  const prices = useMemo(() => Object.fromEntries((priceList || []).map((p) => [p.codigo, p])), [priceList])
   const today = todayMx()
   return (
     <>
@@ -46,9 +61,11 @@ export default function TenderTable({ records, showWinner = false }) {
                   <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-ink-3">
                     <span className="num">{rec.numero}</span>
                     <Tag tone="accent">{categoryName(meta, rec.categoria)}</Tag>
+                    {viaGiro?.has(rec.id) && <Tag>Mismo giro</Tag>}
                     <Closing rec={rec} today={today} />
                   </div>
                   {showWinner && rec.ganador && <div className="mt-1 text-xs text-ink-2">Ganó: {rec.ganador}</div>}
+                  <PriceHint rec={rec} prices={prices} />
                 </td>
                 <td className="px-4 py-3 text-ink-2">
                   <Link to={`/comprador/${rec.comprador_id}`} className="hover:text-ink">{buyerName(meta, rec.comprador_id)}</Link>
@@ -74,6 +91,7 @@ export default function TenderTable({ records, showWinner = false }) {
             <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
               <Status rec={rec} meta={meta} today={today} />
               <Tag tone="accent">{categoryName(meta, rec.categoria)}</Tag>
+              {viaGiro?.has(rec.id) && <Tag>Mismo giro</Tag>}
               <Closing rec={rec} today={today} />
             </div>
             <div className="mt-2 text-[13px] text-ink-2">
@@ -82,6 +100,7 @@ export default function TenderTable({ records, showWinner = false }) {
             <div className="num mt-1 text-xs text-ink-3">
               {rec.numero} · {formatDate(rec.publicado)}{showWinner && rec.monto ? ` · ${formatMXNShort(rec.monto)}` : ''}
             </div>
+            <PriceHint rec={rec} prices={prices} />
           </li>
         ))}
       </ul>

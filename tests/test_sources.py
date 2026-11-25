@@ -87,6 +87,7 @@ EXP_HEADER = [
     "Título del expediente",
     "Tipo Procedimiento",
     "Número de procedimiento/proyecto",
+    "Ley",
     "Nombre anuncio",
     "Descripción anuncio",
     "Operador anuncio",
@@ -119,6 +120,7 @@ def test_comprasmx_expedientes_marks_energy_and_drops_officials(tmp_path):
             "MANTENIMIENTO DE GASODUCTO",
             "LICITACIÓN PÚBLICA",
             "LA-1",
+            "LEY DE OBRAS PÚBLICAS Y SERVICIOS RELACIONADOS CON LAS MISMAS",
             "",
             "",
             "Juan Pérez",
@@ -141,6 +143,7 @@ def test_comprasmx_expedientes_marks_energy_and_drops_officials(tmp_path):
             "MATERIAL DE CURACIÓN",
             "LICITACIÓN PÚBLICA",
             "LA-2",
+            "LEY DE ADQUISICIONES, ARRENDAMIENTOS Y SERVICIOS DEL SECTOR PÚBLICO",
             "",
             "",
             "",
@@ -164,6 +167,7 @@ def test_comprasmx_expedientes_marks_energy_and_drops_officials(tmp_path):
     assert rec["estatus"] == "abierta"
     assert rec["apertura"] == "2026-11-30T11:00:00"
     assert rec["motivo_alcance"] == "comprador:CENAGAS"
+    assert rec["ley"] == "LEY DE OBRAS PÚBLICAS Y SERVICIOS RELACIONADOS CON LAS MISMAS"
     assert "Juan" not in str(rec)
     assert "juan@" not in str(rec)
 

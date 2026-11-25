@@ -112,7 +112,7 @@ export default function Home() {
       {topCats.length > 0 && (
         <div className="mt-6 flex flex-wrap gap-2">
           {topCats.map((c) => (
-            <Link key={c.codigo} to={`/buscar?estatus=abierta&categoria=${c.codigo}`} className="rounded-full border border-line px-3 py-1 text-[13px] text-ink-2 hover:border-accent hover:text-accent">
+            <Link key={c.codigo} to={`/giro/${c.codigo}`} className="rounded-full border border-line px-3 py-1 text-[13px] text-ink-2 hover:border-accent hover:text-accent">
               {c.nombre} <span className="num text-ink-3">{c.abiertas}</span>
             </Link>
           ))}

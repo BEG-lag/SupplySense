@@ -8,6 +8,8 @@ import { buyerName, categoryName, SOURCE_NAMES, useMeta } from '../lib/meta.jsx'
 import { describePercentile, percentileOf } from '../lib/prices.js'
 import { Button, Card, Empty, Loading, Section, StatusBadge, Tag } from '../ui/index.jsx'
 import { displayTitle } from '../lib/text.js'
+import FollowButton from '../components/FollowButton.jsx'
+import Legal from '../components/Legal.jsx'
 
 function Fact({ label, children }) {
   if (children == null || children === '' || children === false) return null
@@ -101,7 +103,10 @@ export default function Tender() {
       </div>
       <h1 className="mt-3 max-w-4xl text-[24px] font-semibold leading-snug tracking-[-0.02em] sm:text-[30px]">{displayTitle(rec.titulo)}</h1>
       {rec.descripcion && <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-ink-2">{displayTitle(rec.descripcion)}</p>}
-      <div className="mt-5"><OfficialLink rec={rec} /></div>
+      <div className="mt-5 flex flex-wrap items-center gap-2">
+        <OfficialLink rec={rec} />
+        <FollowButton tipo="licitacion" id={rec.id} nombre={rec.titulo} snapshot={{ estatus: status }} />
+      </div>
 
       {rec.fuente === 'pemex' && (
         <p className="mt-4 max-w-3xl rounded-lg bg-subtle p-3 text-[13px] text-ink-2">
@@ -121,10 +126,6 @@ export default function Tender() {
           <Fact label="Tipo de contratación">{rec.tipo_contratacion}</Fact>
           <Fact label="Carácter">{rec.caracter}</Fact>
           <Fact label="Publicación">{formatDateTime(rec.publicado)}</Fact>
-          <Fact label="Junta de aclaraciones">{rec.aclaraciones && formatDateTime(rec.aclaraciones)}</Fact>
-          <Fact label="Apertura de propuestas">{rec.apertura && formatDateTime(rec.apertura)}</Fact>
-          <Fact label="Apertura económica">{rec.apertura_economica && formatDateTime(rec.apertura_economica)}</Fact>
-          <Fact label="Fallo">{rec.fallo && formatDateTime(rec.fallo)}</Fact>
           <Fact label="Firma del contrato">{rec.firma && formatDate(rec.firma)}</Fact>
           <Fact label="Vigencia">{rec.inicio && `${formatDate(rec.inicio)} a ${formatDate(rec.fin)}`}</Fact>
           <Fact label={winners.length > 1 ? 'Ganadores' : 'Ganador'}>
@@ -143,6 +144,8 @@ export default function Tender() {
           <Fact label="Fuente">{SOURCE_NAMES[rec.fuente]} · visto por primera vez el {formatDate(rec.primera_vez)}</Fact>
         </dl>
       </Section>
+
+      <Legal rec={rec} />
 
       <PriceContext rec={rec} meta={meta} />
 

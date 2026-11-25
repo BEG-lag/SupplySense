@@ -62,3 +62,24 @@ describe('búsqueda', () => {
     expect(applyFilters(recs, { categoria: 'valvulas' }).map((r) => r.id)).toEqual(['a'])
   })
 })
+
+import { inferCategories } from '../src/lib/giros.js'
+
+describe('búsqueda por giro', () => {
+  const meta = {
+    giros: [
+      { codigo: 'vehiculos', incluir: '\\bvehiculos?\\b|camioneta', excluir: null },
+      { codigo: 'valvulas', incluir: '\\bvalvula', excluir: null },
+      { codigo: 'perforacion', incluir: '\\bpozos?\\b', excluir: 'pozos? de agua' },
+    ],
+    sinonimos: { patrullas: 'vehiculos' },
+  }
+  it('usa sinónimos y las mismas reglas del build', () => {
+    expect([...inferCategories('Patrullas', meta)]).toEqual(['vehiculos'])
+    expect([...inferCategories('válvulas de compuerta', meta)]).toEqual(['valvulas'])
+  })
+  it('respeta las exclusiones', () => {
+    expect([...inferCategories('pozos de agua', meta)]).toEqual([])
+    expect([...inferCategories('reparación de pozos', meta)]).toEqual(['perforacion'])
+  })
+})

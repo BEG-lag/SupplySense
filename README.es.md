@@ -40,8 +40,14 @@ comprador. Energía y O&G es su vertical destacada. Cada registro liga a su fuen
   "probabilidad de ganar".
 - **Ganadores, empresas y compradores**: adjudicaciones recientes, historial de cada empresa y a
   quién le compra cada dependencia.
-- **Búsquedas guardadas** en el navegador, sin cuenta, con "nuevas desde tu última visita", y
-  **feeds Atom** por fuente y categoría.
+- **Búsqueda por giro**: "patrullas" también encuentra las convocatorias de vehículos, con las
+  mismas reglas de clasificación del build y una lista de sinónimos, todo en el navegador.
+- **Marco legal y calendario** en cada procedimiento: la ley aplicable que reporta la fuente (y el
+  régimen propio de CFE y PEMEX, ligado a [leyes-mx](https://github.com/BEG-lag/leyes-mx)), qué
+  significa el tipo de procedimiento y las fechas de junta, apertura y fallo. No es opinión legal.
+- **Páginas por estado y por giro**, con título propio para compartirlas.
+- **Búsquedas guardadas y seguimiento** de empresas, compradores y licitaciones, solo en el
+  navegador: sin cuenta, sin correos y sin notificaciones; al volver ves qué cambió.
 
 ## 2. Fuentes
 

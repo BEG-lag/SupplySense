@@ -40,8 +40,14 @@ and oil & gas is its featured vertical. Every record links to its official sourc
   winning".
 - **Winners, companies and buyers**: recent awards, each company's history and who each agency
   buys from.
-- **Saved searches** in the browser, no account needed, with "new since your last visit", plus
-  **Atom feeds** per source and category.
+- **Search by trade**: "patrullas" (patrol cars) also finds vehicle tenders, using the build's
+  classification rules plus a synonym list, all in the browser.
+- **Legal frame and calendar** on every procedure: the law the source reports (and CFE's and
+  PEMEX's own regimes, linked to [leyes-mx](https://github.com/BEG-lag/leyes-mx)), what the
+  procedure type means and the clarification, opening and award dates. Not legal advice.
+- **Pages per state and per trade**, each with its own title for sharing.
+- **Saved searches and following** companies, buyers and tenders, only in the browser: no
+  account, no email, no notifications; when you come back you see what changed.
 
 ## 2. Sources
 

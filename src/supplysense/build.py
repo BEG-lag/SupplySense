@@ -974,6 +974,16 @@ def build_site(
         },
         "comprasmx_faltantes": data["comprasmx_faltantes"],
         "compradores": {b["id"]: b["nombre"] for b in buyer_list},
+        # Mismas reglas que el build, para clasificar en el navegador lo que alguien busca.
+        "giros": [
+            {
+                "codigo": c.codigo,
+                "incluir": c.incluir.pattern,
+                "excluir": c.excluir.pattern if c.excluir else None,
+            }
+            for c in rules.categories()
+        ],
+        "sinonimos": rules.synonyms(),
         "estatus": STATUS_LABELS,
         "anios": years_index,
         "indice_archivos": sorted(f"{y}-{sec}" for y, sec in by_year),

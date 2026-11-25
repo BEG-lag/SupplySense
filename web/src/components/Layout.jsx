@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { feedUrl } from '../lib/data.js'
 import { formatDate } from '../lib/format.js'
 import { useMeta } from '../lib/meta.jsx'
+import { useFollowed } from '../lib/follow.js'
 import { useSaved } from '../lib/saved.js'
 import { cx } from '../ui/index.jsx'
 
@@ -36,6 +37,8 @@ function Brand() {
 function Header() {
   const [open, setOpen] = useState(false)
   const { list } = useSaved()
+  const { list: followed } = useFollowed()
+  const savedCount = list.length + followed.length
   const location = useLocation()
   const pill = ({ isActive }) => cx(
     'rounded-full px-3.5 py-1.5 text-[13.5px] transition-colors',
@@ -53,7 +56,7 @@ function Header() {
             'rounded-full border px-3.5 py-1.5 text-[13.5px] transition-colors',
             isActive ? 'border-accent text-accent' : 'border-line text-ink-2 hover:border-accent hover:text-accent',
           )}>
-            Guardadas{list.length > 0 && <span className="num ml-1.5">{list.length}</span>}
+            Guardadas{savedCount > 0 && <span className="num ml-1.5">{savedCount}</span>}
           </NavLink>
           <button
             type="button"
@@ -101,6 +104,7 @@ function Footer() {
             <li><a className={link} href="https://comprasmx.buengobierno.gob.mx/datos-abiertos" rel="noreferrer" target="_blank">ComprasMX, datos abiertos</a></li>
             <li><a className={link} href="https://msc.cfe.mx/Aplicaciones/NCFE/Concursos/" rel="noreferrer" target="_blank">CFE, Micrositio de Concursos</a></li>
             <li><a className={link} href="https://www.pemex.com/procura/procedimientos-de-contratacion/concursosabiertos/Paginas/default.aspx" rel="noreferrer" target="_blank">PEMEX, concursos abiertos</a></li>
+            <li><Link className={link} to="/estados">Convocatorias por estado</Link></li>
             <li><a className={link} href={feedUrl()}>Feed Atom de convocatorias</a></li>
           </ul>
         </div>
