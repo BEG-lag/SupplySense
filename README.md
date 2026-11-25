@@ -1,3 +1,7 @@
+<p align="center">
+  <a href="https://pivotek.mx"><img src="assets/pivotek-logo.svg" alt="PIVOTEK" width="200"></a>
+</p>
+
 # SupplySense
 
 <p><b>English</b> · <a href="README.es.md">Español</a></p>
