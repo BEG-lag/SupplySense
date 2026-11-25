@@ -131,7 +131,7 @@ export default function Home() {
       <Section title="Qué puedes hacer">
         <div className="grid gap-4 md:grid-cols-3">
           {[
-            ['Encontrar convocatorias', 'Busca por lo que vendes en más de 800 dependencias federales, CFE y PEMEX. Filtra por estado, categoría, comprador y sector.', '/buscar?estatus=abierta', 'Buscar'],
+            ['Encontrar convocatorias', 'Busca por lo que vendes en más de 800 dependencias federales, CFE, PEMEX y tres estados. Filtra por estado, categoría, comprador y sector.', '/buscar?estatus=abierta', 'Buscar'],
             ['Saber cuánto se ha pagado', 'Percentiles de precio en 35 categorías con más de 300 mil adjudicaciones, y un comparador para ver dónde cae tu monto.', '/precios', 'Ver precios'],
             ['Ver quién gana', 'Ganadores recientes, 60 mil empresas con su historial y la concentración de cada mercado.', '/ganadores', 'Ver ganadores'],
           ].map(([title, text, to, cta]) => (

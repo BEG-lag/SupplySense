@@ -38,7 +38,7 @@ if (existsSync(metaPath)) {
   for (const c of meta.categorias) {
     const name = c.nombre.toLowerCase()
     page(`precios/${c.codigo}`, `Precios de ${name} · SupplySense`, `Cuánto se ha pagado en ${name} en las compras públicas de México: percentiles, tendencia y quién gana.`)
-    page(`giro/${c.codigo}`, `Licitaciones de ${name} · SupplySense`, `Convocatorias abiertas de ${name} en el gobierno federal, CFE y PEMEX, con el rango de precios del giro.`)
+    page(`giro/${c.codigo}`, `Licitaciones de ${name} · SupplySense`, `Convocatorias abiertas de ${name} en el gobierno federal, CFE, PEMEX, Jalisco, CDMX y Campeche, con el rango de precios del giro.`)
   }
   for (const e of meta.entidades) {
     page(`estado/${slugify(e)}`, `Licitaciones abiertas en ${e} · SupplySense`, `Convocatorias abiertas en ${e}: dependencias federales, compras con dinero federal y CFE.`)
