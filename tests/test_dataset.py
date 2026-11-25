@@ -26,7 +26,14 @@ def contracts():
 
 def test_ids_match_source(procs, contracts):
     for rec in list(procs.values()) + list(contracts.values()):
-        prefix = {"cfe": "cfe:", "pemex": "pemex:", "comprasmx": "cmx:"}[rec["fuente"]]
+        prefix = {
+            "cfe": "cfe:",
+            "pemex": "pemex:",
+            "comprasmx": "cmx:",
+            "jalisco": "jal:",
+            "cdmx": "cdmx:",
+            "campeche": "camp:",
+        }[rec["fuente"]]
         assert rec["id"].startswith(prefix), rec["id"]
 
 

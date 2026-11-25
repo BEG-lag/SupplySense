@@ -4,6 +4,21 @@ import { useMeta } from '../lib/meta.jsx'
 import { Card, Loading, PageHeader, Section } from '../ui/index.jsx'
 
 const SOURCES = {
+  jalisco: {
+    url: 'https://compras.jalisco.gob.mx/requisition/tree',
+    what: 'Compras con recursos propios del gobierno de Jalisco (Secretaría de Administración): convocatorias abiertas, en junta, en evaluación y canceladas, con el calendario de junta, apertura y fallo.',
+    limits: 'El portal solo lista lo vigente: lo que sale del listado se conserva con su último estado y se da por concluido cuando pasa la fecha de fallo. Lo que tiene número federal ya viene de ComprasMX y no se duplica.',
+  },
+  cdmx: {
+    url: 'https://concursodigital.finanzas.cdmx.gob.mx/convocatorias_publicas',
+    what: 'Concurso Digital de la Ciudad de México: convocatorias de dependencias locales con fechas de junta de aclaraciones, apertura y fallo.',
+    limits: 'El portal no publica estatus: se estima por fechas. No se guardan el nombre del servidor público responsable ni datos bancarios que muestra la página.',
+  },
+  campeche: {
+    url: 'https://safin.campeche.gob.mx/convocatorias/estatales',
+    what: 'Licitaciones públicas estatales de la Secretaría de Administración, Finanzas y Planeación de Campeche, leídas del PDF de cada convocatoria: objeto, dependencia que solicita, ley aplicable y fechas.',
+    limits: 'Solo las de esa Secretaría; las de salud, obra pública y municipios (Carmen incluido) aún no. El estatus se estima por fechas.',
+  },
   cfe: {
     url: 'https://msc.cfe.mx/Aplicaciones/NCFE/Concursos/',
     what: 'Todos los procedimientos del Micrositio de Concursos desde 2015: estatus, ganadores y monto adjudicado. De los vigentes se lee además el detalle (empresa de CFE y fechas de apertura y fallo).',
@@ -32,7 +47,7 @@ export default function Sources() {
       </PageHeader>
 
       <div className="grid gap-4">
-        {Object.entries(SOURCES).map(([key, s]) => {
+        {['comprasmx', 'cfe', 'pemex', 'jalisco', 'cdmx', 'campeche'].map((key) => [key, SOURCES[key]]).map(([key, s]) => {
           const f = meta.fuentes[key]
           return (
             <Card key={key} className="p-5">
@@ -51,6 +66,11 @@ export default function Sources() {
           )
         })}
       </div>
+
+      <p className="mt-4 text-sm leading-relaxed text-ink-3">
+        Pendientes: Estado de México (su portal exige sesiones de JSF y publica las fechas solo en
+        PDF) y Tabasco (el portal estatal no respondió al revisarlo).
+      </p>
 
       <Section title="Cómo se arma">
         <ol className="list-decimal space-y-2 pl-5 text-[15px] leading-relaxed text-ink-2">

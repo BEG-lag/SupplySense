@@ -64,10 +64,13 @@ class PoliteClient:
                 time.sleep(delay)
         self._last[host] = time.monotonic()
 
-    def request(self, method: str, url: str, **kwargs: Any) -> httpx.Response:
+    def request(
+        self, method: str, url: str, *, retries: int | None = None, **kwargs: Any
+    ) -> httpx.Response:
         host = urlsplit(url).netloc
         error: Exception | None = None
-        for attempt in range(self.retries + 1):
+        retries = self.retries if retries is None else retries
+        for attempt in range(retries + 1):
             self._wait(host)
             try:
                 response = self._client.request(method, url, **kwargs)
@@ -84,7 +87,7 @@ class PoliteClient:
                 retry_after = response.headers.get("Retry-After", "")
                 if retry_after.isdigit():
                     time.sleep(min(int(retry_after), 60))
-            if attempt < self.retries:
+            if attempt < retries:
                 time.sleep(min(2**attempt * 2, 30))
         raise FetchError(f"Se abandona {url}: {error}")
 

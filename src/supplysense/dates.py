@@ -81,3 +81,54 @@ def from_dmy(value: str | None) -> str | None:
 def day_of(value: str | None) -> str | None:
     """Parte de fecha de un ISO (``2026-11-25T10:14:49`` → ``2026-11-25``)."""
     return value[:10] if value else None
+
+
+MONTHS = {
+    "enero": 1,
+    "febrero": 2,
+    "marzo": 3,
+    "abril": 4,
+    "mayo": 5,
+    "junio": 6,
+    "julio": 7,
+    "agosto": 8,
+    "septiembre": 9,
+    "setiembre": 9,
+    "octubre": 10,
+    "noviembre": 11,
+    "diciembre": 12,
+}
+_ES_SLASH = re.compile(
+    r"(\d{1,2})\s*/\s*([a-záéíóú]+)\s*/\s*(\d{4})(?:\s+(\d{1,2}):(\d{2}))?", re.I
+)
+_ES_WORDS = re.compile(r"(\d{1,2})\s+de\s+([a-záéíóú]+)\s+de(?:l)?\s+(\d{4})", re.I)
+
+
+def from_spanish(value: str | None) -> str | None:
+    """``23/noviembre/2026 14:00`` → ``2026-11-23T14:00:00``; ``17 de noviembre de 2026`` →
+    ``2026-11-17``."""
+    if not value:
+        return None
+    m = _ES_SLASH.search(value)
+    if m:
+        day, month, year, hour, minute = m.groups()
+        month_n = MONTHS.get(month.lower())
+        if not month_n:
+            return None
+        try:
+            if hour is None:
+                return date(int(year), month_n, int(day)).isoformat()
+            return datetime(int(year), month_n, int(day), int(hour), int(minute)).isoformat(
+                timespec="seconds"
+            )
+        except ValueError:
+            return None
+    m = _ES_WORDS.search(value)
+    if m:
+        day, month, year = m.groups()
+        month_n = MONTHS.get(month.lower())
+        try:
+            return date(int(year), month_n, int(day)).isoformat() if month_n else None
+        except ValueError:
+            return None
+    return None

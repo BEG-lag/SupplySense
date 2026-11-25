@@ -43,6 +43,12 @@ function lawFor(rec) {
       fuente: 'Texto y reformas en leyes-mx',
     }
   }
+  if (['jalisco', 'cdmx', 'campeche'].includes(rec.fuente)) {
+    return {
+      nombre: rec.ley || `Legislación de adquisiciones de ${rec.entidad}`,
+      nota: 'Compra con recursos estatales: aplica la ley local de adquisiciones, no la federal. Revisa en la convocatoria el fundamento exacto.',
+    }
+  }
   if (rec.ley && LAWS[rec.ley]) return LAWS[rec.ley]
   if (rec.ley) return { nombre: rec.ley.charAt(0) + rec.ley.slice(1).toLowerCase() }
   return null
@@ -86,6 +92,7 @@ export default function Legal({ rec }) {
   const notes = [typeNote(rec.tipo_procedimiento), characterNote(rec.caracter)].filter(Boolean)
   const events = [
     ['Publicación', rec.publicado],
+    ['Fecha límite de registro y venta de bases', rec.registro],
     ['Junta de aclaraciones', rec.aclaraciones],
     ['Presentación y apertura de propuestas', rec.apertura],
     ['Apertura económica', rec.apertura_economica],

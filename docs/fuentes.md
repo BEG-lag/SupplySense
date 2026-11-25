@@ -7,7 +7,11 @@ Cada registro del sitio liga a su fuente oficial. Este documento dice de dónde 
 | CFE, Micrositio de Concursos | VERDE | Convocatorias vigentes, ganadores y montos desde 2015 | 114,970 procedimientos; 608 vigentes en la fuente (406 con apertura aún por venir); 88,153 adjudicados con monto |
 | PEMEX, concursos abiertos | VERDE | Avisos de concursos de PEMEX por segmento | 11,926 avisos desde 2015; sin fecha límite, montos ni ganadores |
 | ComprasMX, datos abiertos | VERDE | Todos los procedimientos y contratos federales (y estatales con dinero federal) | 2025 y 2026: 183 mil expedientes y 222 mil contratos; unos 1,080 abiertos |
-| Campeche | AMARILLO | Filtro por entidad sobre las tres fuentes; el canal estatal propio no está identificado | [BRECHA DE DATO] |
+| Jalisco | VERDE | Compras estatales con recursos propios | Unas 60 abiertas a la vez; historial desde 2022 en el portal |
+| CDMX | VERDE | Concurso Digital: convocatorias de dependencias locales | Unas 1,500 al año [ESTIMADO]; pocas abiertas a la vez |
+| Campeche | AMARILLO | Licitaciones estatales de SAFIN, desde los PDF | 336 convocatorias de 2022 a 2026 |
+| Estado de México | ROJO | COMPRAMEX (JSF/PrimeFaces) | Pendiente |
+| Tabasco | ROJO | Portal estatal sin respuesta | Pendiente |
 | Tipo de cambio FIX | VERDE | Conversión de contratos en dólares | Serie diaria desde 1991, del repo indicadores-mx |
 
 ## CFE: Micrositio de Concursos (msc.cfe.mx)
@@ -35,10 +39,30 @@ Cada registro del sitio liga a su fuente oficial. Este documento dice de dónde 
 - **Límites**: CFE y PEMEX no publican aquí. La vertical de energía (IMP, CENACE, CENAGAS, SENER, INEEL, ASEA, CNE, CONUEE y palabras de contexto) es de unos 1,100 procedimientos y 1,000 contratos al año.
 - **Almacenamiento**: los archivos son fotos completas de cada año, así que no se guardan en git. Se bajan cada día (el año anterior, los lunes), se validan columnas y volumen antes de sustituir los de la caché de Actions, y en `data/vistos/` solo se registra cuándo se vio cada registro por primera vez.
 
-## Campeche
+## Portales estatales (compras con recursos propios)
 
-- Lo que pasa por ComprasMX y CFE se filtra por `Entidad Federativa`. PEMEX no da entidad; su lista PEP (Exploración y Producción) concentra lo de la Sonda de Campeche.
-- [BRECHA DE DATO] El canal oficial de las compras estatales con recursos propios no está identificado.
+Los portales estatales solo muestran lo vigente: lo que sale del listado se conserva con su último estado y el estatus se estima por fechas (pasada la apertura, "en evaluación"; pasado el fallo, "concluida"). Lo que trae número federal ya viene de ComprasMX y se descarta para no duplicar. No se guardan nombres de servidores públicos ni datos bancarios.
+
+### Jalisco
+
+- **Listado**: `GET https://compras.jalisco.gob.mx/requisition/tree?tender_stage=<etapa>&step=500`, con etapas `posted`, `in_clarification_meeting`, `in_evaluation` y `cancelled`. Tabla HTML con celdas identificadas (`stage-cell`, `code-cell`, `responsible-unit-cell`, `description-cell`, `character-cell`, `published-cell`).
+- **Detalle**: `/requisition/view/{id}`, con "Calendario de Actividades" (junta aclaratoria, presentación y apertura de propuestas, fallo). Se lee para las abiertas, a lo más una vez por semana.
+
+### Ciudad de México
+
+- **Listado**: `GET https://concursodigital.finanzas.cdmx.gob.mx/convocatorias_publicas` (el host `panel.concursodigital.cdmx.gob.mx` tiene un certificado que no cubre su nombre).
+- **Detalle**: `/proveedores/detalle_convocatoria/{base64(id)}`, con ids consecutivos: cada día se avanza desde el último conocido hasta dejar de encontrar. Trae unidad convocante, método, tipo, carácter, número y fechas de junta, apertura y fallo.
+
+### Campeche
+
+- **Listado**: `GET https://safin.campeche.gob.mx/convocatorias/estatales?limit=0` (descargas de Joomla). Las de `/convocatorias/nacionales` ya están en ComprasMX.
+- **PDF**: texto digital; se extraen número, objeto, dependencia que solicita, ley estatal aplicable, fecha límite de registro y venta de bases, junta de aclaraciones y apertura.
+- Lo que pasa por ComprasMX y CFE en Campeche se ve con el filtro de entidad; PEMEX no da entidad (su lista PEP concentra lo de la Sonda de Campeche).
+
+### Pendientes
+
+- **Estado de México**: COMPRAMEX es JSF/PrimeFaces; requiere `ViewState`, una consulta por unidad y pausas largas, y las fechas solo vienen en PDF.
+- **Tabasco**: el listado es un iframe a una IP sin HTTPS que no respondió.
 
 ## Advertencia
 

@@ -21,4 +21,5 @@ export function buyerName(meta, id) {
   return meta?.compradores?.[id] || id
 }
 
-export const SOURCE_NAMES = { cfe: 'CFE', pemex: 'PEMEX', comprasmx: 'ComprasMX' }
+export const SOURCE_NAMES = { comprasmx: 'ComprasMX', cfe: 'CFE', pemex: 'PEMEX', jalisco: 'Jalisco', cdmx: 'CDMX', campeche: 'Campeche' }
+export const STATE_SOURCES = ['jalisco', 'cdmx', 'campeche']

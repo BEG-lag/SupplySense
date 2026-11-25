@@ -1,4 +1,12 @@
 {
+  "campeche": {
+    "registros": 335,
+    "ultima_ok": "2026-11-25"
+  },
+  "cdmx": {
+    "registros": 511,
+    "ultima_ok": "2026-11-25"
+  },
   "cfe": {
     "registros": 114977,
     "ultima_ok": "2026-11-25"
@@ -13,6 +21,10 @@
     "ultima_ok": "2026-11-25"
   },
   "fix": {
+    "ultima_ok": "2026-11-25"
+  },
+  "jalisco": {
+    "registros": 131,
     "ultima_ok": "2026-11-25"
   },
   "pemex": {

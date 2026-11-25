@@ -59,7 +59,10 @@ and oil & gas is its featured vertical. Every record links to its official sourc
 | PEMEX, open tenders | GREEN | ~12,000 notices by segment; PEMEX publishes no deadline, amount or winner |
 | ComprasMX open data | GREEN | Every 2025 and 2026 procedure (~180,000) and contract (~220,000) of the federal government, and of states and municipalities spending federal funds |
 | FIX exchange rate | GREEN | From [indicadores-mx](https://github.com/BEG-lag/indicadores-mx), for USD contracts |
-| State and municipal purchases with their own funds | AMBER | Local portals not integrated yet |
+| Jalisco, state purchases | GREEN | Calls from the state purchasing portal, with clarification, opening and award dates |
+| Mexico City, Concurso Digital | GREEN | Calls from local agencies, with dates; status estimated from dates |
+| Campeche, SAFIN | AMBER | State tenders read from each call's PDF; health, public works and municipalities still missing |
+| State of Mexico and Tabasco | RED | Pending: Edomex needs JSF sessions and keeps dates in PDFs; Tabasco's portal did not respond |
 
 Endpoints, formats and quirks are documented in [`docs/fuentes.md`](docs/fuentes.md) (Spanish).
 

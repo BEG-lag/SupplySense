@@ -68,7 +68,18 @@ STATUS_LABELS = {
     "aviso": "Aviso publicado",
     "otro": "Otro",
 }
-SOURCE_LABELS = {"cfe": "CFE", "pemex": "PEMEX", "comprasmx": "ComprasMX"}
+SOURCE_LABELS = {
+    "comprasmx": "ComprasMX",
+    "cfe": "CFE",
+    "pemex": "PEMEX",
+    "jalisco": "Jalisco",
+    "cdmx": "CDMX",
+    "campeche": "Campeche",
+}
+# Portales estatales: compras con recursos propios. Prefijo para el id del comprador.
+STATE_SOURCES = {"jalisco": "jal", "cdmx": "cdmx", "campeche": "camp"}
+# Una estatal sin fechas se da por concluida después de este tiempo [SUPUESTO].
+STATE_STALE_DAYS = 60
 _WORD = re.compile(r"[a-z0-9]{4,}")
 _STOP = {
     "para",
@@ -227,6 +238,15 @@ def buyer_of(rec: dict[str, Any], cfe_names: dict[str, str]) -> tuple[str, str]:
     if rec["fuente"] == "pemex":
         name = f"PEMEX {rec.get('segmento', '')}".strip()
         return slug(name), name
+    if rec["fuente"] in STATE_SOURCES:
+        name = title_name(rec.get("comprador")) or SOURCE_LABELS[rec["fuente"]]
+        state = SOURCE_LABELS[rec["fuente"]]
+        label = (
+            name
+            if state.lower() in fold(name) or rec["fuente"] == "campeche"
+            else f"{name} ({state})"
+        )
+        return f"{STATE_SOURCES[rec['fuente']]}-{slug(name)}", label
     siglas = rec.get("siglas") or ""
     buyer = rules.match_buyer(rec.get("comprador"), siglas)
     if buyer:
@@ -245,7 +265,27 @@ def final_status(rec: dict[str, Any], today: date) -> tuple[str, bool]:
             return "abierta", True
         return "aviso", True
     status = rec.get("estatus") or "otro"
-    if status == "abierta" and rec.get("apertura") and rec["apertura"][:10] < today.isoformat():
+    iso = today.isoformat()
+    if rec["fuente"] in STATE_SOURCES and status == "abierta":
+        # Los portales estatales solo muestran lo vigente: el estatus sale de las fechas.
+        estimated = rec["fuente"] != "jalisco"
+        if rec.get("fallo") and rec["fallo"][:10] < iso:
+            return "concluida", True
+        if rec.get("apertura") and rec["apertura"][:10] < iso:
+            return "en_evaluacion", True
+        if rec.get("apertura"):
+            return "abierta", estimated
+        published = day_of(rec.get("publicado"))
+        if published:
+            if (today - date.fromisoformat(published)).days > STATE_STALE_DAYS:
+                return "concluida", True
+            return "abierta", estimated
+        # Sin ninguna fecha: si el año del número ya pasó, concluida; si no, solo un aviso.
+        year = re.search(r"(20\d{2})", rec.get("numero") or "")
+        if year and int(year.group(1)) < today.year:
+            return "concluida", True
+        return "aviso", True
+    if status == "abierta" and rec.get("apertura") and rec["apertura"][:10] < iso:
         return "en_evaluacion", True
     return status, False
 
@@ -282,13 +322,22 @@ def prepare(root: Path, today: date, cache_dir: Path = RAW_DIR) -> dict[str, Any
     cmx_procs, cmx_contracts, missing = load_comprasmx(cache_dir, seen, today)
     procs.update({r["id"]: r for r in cmx_procs})
     contracts.update({r["id"]: r for r in cmx_contracts})
+    # Lo que un portal estatal publica con número federal ya viene en ComprasMX: no se duplica.
+    federal_numbers = {fold(r.get("numero")) for r in cmx_procs if r.get("numero")}
+    duplicates = [
+        k
+        for k, r in procs.items()
+        if r["fuente"] in STATE_SOURCES and fold(r.get("numero")) in federal_numbers
+    ]
+    for key in duplicates:
+        del procs[key]
     stale = apply_corrections(procs) + apply_corrections(contracts)
 
     # Categorías y sector con las reglas vigentes.
     for collection in (procs, contracts):
         for rec in collection.values():
             text = f"{rec.get('titulo') or ''} {rec.get('descripcion') or ''}"
-            if rec["fuente"] == "comprasmx":
+            if rec["fuente"] not in ("cfe", "pemex"):
                 rec["motivo_alcance"] = rules.scope_reason(
                     rec.get("comprador"), rec.get("siglas"), text
                 )
@@ -316,6 +365,7 @@ def prepare(root: Path, today: date, cache_dir: Path = RAW_DIR) -> dict[str, Any
         "fix": fix,
         "stale_corrections": stale,
         "comprasmx_faltantes": missing,
+        "duplicados_estatales": len(duplicates),
         "estado": store.load_json(root / "estado_fuentes.json", {}),
     }
 
@@ -982,6 +1032,7 @@ def build_site(
             "todos": {"abiertas": len(open_recs), "procedimientos": len(procs)},
         },
         "comprasmx_faltantes": data["comprasmx_faltantes"],
+        "duplicados_estatales": data["duplicados_estatales"],
         "compradores": {b["id"]: b["nombre"] for b in buyer_list},
         # Mismas reglas que el build, para clasificar en el navegador lo que alguien busca.
         "giros": [

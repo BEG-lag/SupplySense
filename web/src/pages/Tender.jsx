@@ -35,7 +35,14 @@ function OfficialLink({ rec }) {
   const copy = () => {
     navigator.clipboard?.writeText(rec.numero).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) })
   }
-  const label = { cfe: 'Abrir el buscador de CFE', pemex: 'Ver en el portal de PEMEX', comprasmx: 'Ver en ComprasMX' }[rec.fuente]
+  const label = {
+    cfe: 'Abrir el buscador de CFE',
+    pemex: 'Ver en el portal de PEMEX',
+    comprasmx: 'Ver en ComprasMX',
+    jalisco: 'Ver en Compras Jalisco',
+    cdmx: 'Ver en Concurso Digital CDMX',
+    campeche: 'Descargar la convocatoria (PDF)',
+  }[rec.fuente]
   const url = officialUrl(rec)
   return (
     <div className="flex flex-wrap items-center gap-2">

@@ -9,14 +9,14 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
 from . import store
 from .dates import day_of
 from .http import FetchError, PoliteClient
-from .sources import cfe, comprasmx, fix, pemex
+from .sources import campeche, cdmx, cfe, comprasmx, fix, jalisco, pemex
 
 log = logging.getLogger(__name__)
 
@@ -121,6 +121,89 @@ def update_pemex(
     return merge(procs, pemex.fetch(client), scope=lambda r: r["fuente"] == "pemex", today=today)
 
 
+def upsert(
+    procs: dict[str, dict[str, Any]],
+    fresh: list[dict[str, Any]],
+    today: date,
+    keep: tuple[str, ...] = (),
+) -> None:
+    """Agrega o actualiza sin borrar: lo que sale de un listado estatal se conserva con su
+    último estado (los portales estatales solo muestran lo vigente)."""
+    for rec in fresh:
+        prev = procs.get(rec["id"])
+        if prev:
+            for key in keep:
+                if rec.get(key) in (None, "") and prev.get(key) not in (None, ""):
+                    rec[key] = prev[key]
+        rec["primera_vez"] = first_seen(prev, rec, today)
+        procs[rec["id"]] = rec
+
+
+STATE_KEEP = ("aclaraciones", "apertura", "fallo", "detalle_leido")
+
+
+def update_jalisco(
+    client: PoliteClient, procs: dict[str, dict[str, Any]], today: date, max_details: int = 120
+) -> dict[str, dict[str, Any]]:
+    fresh = jalisco.fetch_list(client)
+    if not fresh:
+        raise ValueError("Jalisco: el listado vino vacío")
+    upsert(procs, fresh, today, STATE_KEEP)
+    stale = (today - timedelta(days=7)).isoformat()
+    pending = [
+        procs[r["id"]]
+        for r in fresh
+        if r["estatus"] in ("abierta", "en_evaluacion")
+        and (procs[r["id"]].get("detalle_leido") or "") < stale
+    ]
+    for rec in pending[:max_details]:
+        rec.update(
+            {k: v for k, v in jalisco.parse_detail(client.get_ok(rec["url"]).text).items() if v}
+        )
+        rec["detalle_leido"] = today.isoformat()
+    return procs
+
+
+def update_cdmx(
+    client: PoliteClient, procs: dict[str, dict[str, Any]], today: date, backfill: int = 0
+) -> dict[str, dict[str, Any]]:
+    listed = cdmx.list_ids(client.get_ok(cdmx.LIST_URL).text)
+    known = {r["fuente_id"] for r in procs.values() if r["fuente"] == "cdmx"}
+    top = max([*known, *listed, 0])
+    wanted = list(listed)  # las vigentes se releen: sus fechas pueden cambiar
+    wanted += [n for n in range(max(1, top - backfill), top) if n not in known]
+    misses, n = 0, top + 1
+    while misses < 3 and n <= top + 60:  # ids consecutivos: avanzar hasta dejar de encontrar
+        page = cdmx.fetch_detail(client, n)
+        if page and (rec := cdmx.parse_detail(page, n)):
+            upsert(procs, [rec], today, STATE_KEEP)
+            misses = 0
+        else:
+            misses += 1
+        n += 1
+    for n in sorted(set(wanted)):
+        page = cdmx.fetch_detail(client, n)
+        if page and (rec := cdmx.parse_detail(page, n)):
+            upsert(procs, [rec], today, STATE_KEEP)
+    return procs
+
+
+def update_campeche(
+    client: PoliteClient, procs: dict[str, dict[str, Any]], today: date, max_new: int = 100
+) -> dict[str, dict[str, Any]]:
+    items = campeche.fetch_list(client)
+    if not items:
+        raise ValueError("Campeche: el listado vino vacío")
+    known = {str(r["fuente_id"]) for r in procs.values() if r["fuente"] == "campeche"}
+    new = sorted((i for i in items if i["id"] not in known), key=lambda i: -int(i["id"]))
+    for item in new[:max_new]:
+        text = campeche.pdf_text(campeche.fetch_pdf(client, item))
+        rec = campeche.parse_text(text, item["id"], item["titulo"], item["href"])
+        if rec:
+            upsert(procs, [rec], today)
+    return procs
+
+
 def raw_path(cache_dir: Path, kind: str, year: int) -> Path:
     return cache_dir / comprasmx.FILES[kind].format(year=year)
 
@@ -173,9 +256,10 @@ def update(
     root: Path = store.DATA_DIR,
     cache_dir: Path = CACHE_DIR,
     client: PoliteClient | None = None,
-    sources: tuple[str, ...] = ("cfe", "pemex", "comprasmx", "fix"),
+    sources: tuple[str, ...] = ("cfe", "pemex", "comprasmx", "jalisco", "cdmx", "campeche", "fix"),
     years: tuple[int, ...] | None = None,
     max_details: int = 150,
+    backfill: int = 0,
 ) -> Report:
     report = Report()
     own_client = client is None
@@ -223,6 +307,15 @@ def update(
                         kind,
                         cache_dir,
                     )
+        for name, func, extra in (
+            ("jalisco", update_jalisco, {}),
+            ("cdmx", update_cdmx, {"backfill": backfill}),
+            ("campeche", update_campeche, {"max_new": max(100, backfill)}),
+        ):
+            if name in sources:
+                result = report.run(name, func, client, procs, today, **extra)
+                if result is not None:
+                    procs = result
         if "fix" in sources:
             series = report.run("fix", fix.fetch, client)
             if series and store.save_json(root / "externos" / "fix.json", series):
@@ -245,7 +338,7 @@ def update(
             entry.pop("falla_desde", None)
             entry.pop("error", None)
             entry["ultima_ok"] = today.isoformat()
-    for fuente in ("cfe", "pemex"):
+    for fuente in ("cfe", "pemex", "jalisco", "cdmx", "campeche"):
         report.counts[fuente] = sum(1 for r in procs.values() if r["fuente"] == fuente)
         estado.setdefault(fuente, {})["registros"] = report.counts[fuente]
     report.counts["comprasmx"] = sum(counts.values())

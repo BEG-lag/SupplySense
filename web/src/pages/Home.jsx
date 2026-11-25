@@ -21,7 +21,7 @@ function SearchHero({ meta }) {
       {meta && (
         <p className="eyebrow mx-auto mb-7 inline-flex items-center gap-2.5 rounded-full border border-line px-3.5 py-1.5">
           <span className="live" aria-hidden />
-          <span className="text-accent">{formatNumber(meta.totales.abiertas)}</span> convocatorias abiertas · ComprasMX, CFE y PEMEX
+          <span className="text-accent">{formatNumber(meta.totales.abiertas)}</span> convocatorias abiertas · ComprasMX, CFE, PEMEX y 3 estados
         </p>
       )}
       <h1 className="text-[38px] leading-[1] tracking-[-0.05em] sm:text-[60px]">
@@ -29,8 +29,8 @@ function SearchHero({ meta }) {
       </h1>
       <p className="mx-auto mt-4 max-w-2xl text-[16px] leading-relaxed text-ink-2 sm:text-[17px]">
         Cada mañana reunimos las convocatorias abiertas de todo el gobierno federal en ComprasMX,
-        más CFE y PEMEX, y las cruzamos con más de 300 mil adjudicaciones: quién ganó, a qué
-        precio y para qué comprador.
+        más CFE, PEMEX y los portales de Jalisco, CDMX y Campeche, y las cruzamos con más de 300
+        mil adjudicaciones: quién ganó, a qué precio y para qué comprador.
       </p>
       <form
         className="mx-auto mt-7 flex max-w-xl gap-2"

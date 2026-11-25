@@ -26,11 +26,20 @@ def main(argv: list[str] | None = None) -> int:
     upd = sub.add_parser("update", help="lee las fuentes oficiales y actualiza data/")
     upd.add_argument("--today", type=_date, default=None, help="fecha de hoy (AAAA-MM-DD)")
     upd.add_argument(
-        "--solo", nargs="*", default=None, help="solo estas fuentes: cfe pemex comprasmx fix"
+        "--solo",
+        nargs="*",
+        default=None,
+        help="solo estas fuentes: cfe pemex comprasmx jalisco cdmx campeche fix",
     )
     upd.add_argument("--anios", nargs="*", type=int, default=None, help="años de ComprasMX")
     upd.add_argument(
         "--detalles", type=int, default=150, help="máximo de detalles de CFE a leer en esta corrida"
+    )
+    upd.add_argument(
+        "--historico",
+        type=int,
+        default=0,
+        help="carga inicial de estados: ids previos de CDMX y PDFs de Campeche a leer",
     )
 
     build = sub.add_parser("build", help="genera los JSON y feeds del sitio")
@@ -56,10 +65,19 @@ def main(argv: list[str] | None = None) -> int:
         from .pipeline import update
 
         today = args.today or today_mx()
-        sources = tuple(args.solo) if args.solo else ("cfe", "pemex", "comprasmx", "fix")
+        sources = (
+            tuple(args.solo)
+            if args.solo
+            else ("cfe", "pemex", "comprasmx", "jalisco", "cdmx", "campeche", "fix")
+        )
         years = tuple(args.anios) if args.anios else None
         report = update(
-            today, root=args.data, sources=sources, years=years, max_details=args.detalles
+            today,
+            root=args.data,
+            sources=sources,
+            years=years,
+            max_details=args.detalles,
+            backfill=args.historico,
         )
         print(f"update {today}: {len(report.ok)} fuentes ok")
         for name, error in report.failed.items():

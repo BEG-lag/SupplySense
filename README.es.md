@@ -59,7 +59,10 @@ comprador. Energía y O&G es su vertical destacada. Cada registro liga a su fuen
 | PEMEX, concursos abiertos | VERDE | Unos 12 mil avisos por segmento; PEMEX no publica fecha límite, monto ni ganador |
 | ComprasMX, datos abiertos | VERDE | Todos los expedientes (unos 180 mil) y contratos (unos 220 mil) 2025 y 2026 del gobierno federal y de estados y municipios con dinero federal |
 | Tipo de cambio FIX | VERDE | Del repo [indicadores-mx](https://github.com/BEG-lag/indicadores-mx), para contratos en dólares |
-| Compras estatales y municipales con recursos propios | AMARILLO | Portales locales aún no integrados |
+| Jalisco, compras estatales | VERDE | Convocatorias del portal de la Secretaría de Administración, con calendario de junta, apertura y fallo |
+| CDMX, Concurso Digital | VERDE | Convocatorias de dependencias locales, con fechas; estatus estimado por fechas |
+| Campeche, SAFIN | AMARILLO | Licitaciones estatales leídas del PDF de cada convocatoria; faltan salud, obra pública y municipios |
+| Estado de México y Tabasco | ROJO | Pendientes: Edomex exige sesiones JSF y fechas en PDF; el portal de Tabasco no respondió |
 
 El detalle de cada endpoint, formato y rareza está en [`docs/fuentes.md`](docs/fuentes.md).
 

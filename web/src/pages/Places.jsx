@@ -60,7 +60,8 @@ export function StatePage() {
       <nav className="mb-4 text-[13px] text-ink-3"><Link to="/estados" className="hover:text-ink">Por estado</Link> / {name}</nav>
       <PageHeader title={`Licitaciones abiertas en ${name}`} actions={<Button as={Link} size="sm" variant="secondary" to={`/buscar?estatus=abierta&entidad=${encodeURIComponent(name)}`}>Filtrar en Buscar</Button>}>
         Convocatorias de dependencias federales, de compras estatales y municipales con dinero
-        federal y de CFE en {name}.
+        federal y de CFE en {name}
+        {['Jalisco', 'Ciudad de México', 'Campeche'].includes(name) ? ', más las compras con recursos propios que publica el portal del estado.' : '. Las compras con recursos propios de este estado aún no están integradas.'}
       </PageHeader>
       <Card className="grid grid-cols-2 gap-6 p-6 sm:grid-cols-3">
         <Stat value={formatNumber(open.length)} label="Abiertas hoy" />

@@ -13,7 +13,14 @@ from xml.sax.saxutils import escape, quoteattr
 SITE_URL = "https://beg-lag.github.io/SupplySense/"
 TAG_PREFIX = "tag:beg-lag.github.io,2026:SupplySense/"
 MAX_ENTRIES = 100
-SOURCES = {"cfe": "CFE", "pemex": "PEMEX", "comprasmx": "ComprasMX"}
+SOURCES = {
+    "comprasmx": "ComprasMX",
+    "cfe": "CFE",
+    "pemex": "PEMEX",
+    "jalisco": "Jalisco",
+    "cdmx": "CDMX",
+    "campeche": "Campeche",
+}
 
 
 def _updated(rec: dict[str, Any]) -> str:
