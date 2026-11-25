@@ -23,15 +23,15 @@ export default function PriceRange({ percentiles, mark, markLabel = 'Tu monto' }
         <div className="absolute -inset-y-1 w-0.5 rounded" style={{ left: `${p50}%`, background: 'var(--chart-1)' }} />
         {m != null && (
           <div className="absolute -top-6 -translate-x-1/2 text-center" style={{ left: `${m}%` }}>
-            <div className="whitespace-nowrap rounded bg-ink px-1.5 py-0.5 text-[11px] text-bg">{markLabel}</div>
-            <div className="mx-auto h-5 w-0.5 bg-ink" />
+            <div className="whitespace-nowrap rounded-full bg-papel px-2 py-0.5 text-[11px] font-semibold text-tinta">{markLabel}</div>
+            <div className="mx-auto h-5 w-0.5 bg-papel" />
           </div>
         )}
       </div>
       <div className="num mt-2 grid grid-cols-5 text-[11px] text-ink-3">
         <span>P5 {formatMXNShort(lo)}</span>
         <span className="text-center">P25 {formatMXNShort(percentiles['25'])}</span>
-        <span className="text-center font-medium text-ink">Mediana {formatMXNShort(percentiles['50'])}</span>
+        <span className="text-center font-medium text-accent">Mediana {formatMXNShort(percentiles['50'])}</span>
         <span className="text-center">P75 {formatMXNShort(percentiles['75'])}</span>
         <span className="text-right">P95 {formatMXNShort(hi)}</span>
       </div>

@@ -75,7 +75,7 @@ GitHub Actions (06:30 CDMX)
 src/supplysense/   cli, pipeline, store, http, text, dates, rules, build, feeds, sources/
 reglas/            compradores_energia, alcance_palabras, categorias, estatus, correcciones
 data/              procedimientos/AAAA/AAAA-MM.jsonl, contratos/…, estado_fuentes.json
-web/               React 19 + Vite + Tailwind 4 (Geist), páginas en src/pages
+web/               React 19 + Vite + Tailwind 4, marca PIVOTEK (Inter, JetBrains Mono, Cormorant Garamond)
 tests/             pytest
 ```
 

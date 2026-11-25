@@ -1,31 +1,31 @@
-// Primitivas visuales compartidas. Ninguna página define sus propios botones, tarjetas o
-// etiquetas: todo sale de aquí y de los tokens de index.css.
+// Primitivas visuales compartidas con la marca PIVOTEK (tinta, papel y lima). Ninguna página
+// define sus propios botones, tarjetas o etiquetas: todo sale de aquí y de index.css.
 import { Link } from 'react-router-dom'
 
 const cx = (...parts) => parts.filter(Boolean).join(' ')
 
 export function Button({ as: As = 'button', variant = 'primary', size = 'md', className, ...props }) {
-  const base = 'inline-flex items-center justify-center gap-1.5 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap'
-  const sizes = { sm: 'h-8 px-3 text-[13px]', md: 'h-10 px-4 text-sm', lg: 'h-12 px-5 text-[15px]' }
+  const base = 'inline-flex items-center justify-center gap-1.5 rounded-full font-medium transition-colors disabled:opacity-40 disabled:pointer-events-none whitespace-nowrap'
+  const sizes = { sm: 'h-8 px-3.5 text-[13px]', md: 'h-10 px-5 text-sm', lg: 'h-12 px-6 text-[15px]' }
   const variants = {
-    primary: 'bg-accent text-accent-ink hover:bg-accent-hover',
-    secondary: 'border border-line bg-bg text-ink hover:bg-subtle',
+    primary: 'bg-accent text-accent-ink font-semibold hover:bg-accent-hover',
+    secondary: 'border border-line-strong text-ink hover:border-accent hover:text-accent',
     ghost: 'text-ink-2 hover:bg-subtle hover:text-ink',
   }
   return <As className={cx(base, sizes[size], variants[variant], className)} {...props} />
 }
 
 export function Card({ className, ...props }) {
-  return <div className={cx('rounded-xl border border-line bg-bg', className)} {...props} />
+  return <div className={cx('rounded-2xl border border-line bg-subtle', className)} {...props} />
 }
 
 export function PageHeader({ eyebrow, title, children, actions }) {
   return (
-    <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="max-w-3xl">
-        {eyebrow && <p className="mb-2 text-[13px] text-ink-3">{eyebrow}</p>}
-        <h1 className="text-[28px] font-semibold leading-tight tracking-[-0.02em] sm:text-[32px]">{title}</h1>
-        {children && <div className="mt-2 text-[15px] leading-relaxed text-ink-2">{children}</div>}
+        {eyebrow && <p className="eyebrow mb-3">{eyebrow}</p>}
+        <h1 className="text-[30px] leading-[1.05] tracking-[-0.04em] sm:text-[40px]">{title}</h1>
+        {children && <div className="mt-3 text-[15px] leading-relaxed text-ink-2">{children}</div>}
       </div>
       {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
     </header>
@@ -35,9 +35,9 @@ export function PageHeader({ eyebrow, title, children, actions }) {
 export function Stat({ value, label, hint }) {
   return (
     <div className="min-w-0">
-      <div className="num text-2xl font-semibold tracking-tight sm:text-[26px]">{value}</div>
-      <div className="mt-1 text-[13px] text-ink-2">{label}</div>
-      {hint && <div className="mt-0.5 text-xs text-ink-3">{hint}</div>}
+      <div className="text-[28px] font-[650] leading-none tracking-[-0.05em] tabular-nums sm:text-[34px]">{value}</div>
+      <div className="mt-2 text-[13px] text-ink-2">{label}</div>
+      {hint && <div className="eyebrow mt-1 !text-[10px]">{hint}</div>}
     </div>
   )
 }
@@ -58,7 +58,7 @@ export function StatusBadge({ status, label, estimated }) {
   const s = STATUS_STYLE[status] || STATUS_STYLE.otro
   return (
     <span
-      className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium"
+      className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium"
       style={{ color: s.color, background: s.bg }}
       title={estimated ? 'Estimado: la fuente no publica este estatus' : undefined}
     >
@@ -71,20 +71,20 @@ export function StatusBadge({ status, label, estimated }) {
 
 export function Tag({ children, to, tone = 'neutral', className }) {
   const tones = {
-    neutral: 'bg-muted text-ink-2',
-    accent: 'bg-accent-soft text-accent',
+    neutral: 'border border-line text-ink-2',
+    accent: 'border border-line text-ink-2',
     warn: '',
   }
   const style = tone === 'warn' ? { color: 'var(--warn)', background: 'var(--warn-bg)' } : undefined
-  const cls = cx('inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-xs', tones[tone], className)
-  if (to) return <Link to={to} className={cx(cls, 'hover:underline')} style={style}>{children}</Link>
+  const cls = cx('inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs', tones[tone], className)
+  if (to) return <Link to={to} className={cx(cls, 'transition-colors hover:border-accent hover:text-accent')} style={style}>{children}</Link>
   return <span className={cls} style={style}>{children}</span>
 }
 
 export function Input({ className, ...props }) {
   return (
     <input
-      className={cx('h-10 w-full rounded-lg border border-line bg-bg px-3 text-sm text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none', className)}
+      className={cx('h-10 w-full rounded-full border border-line-strong bg-subtle px-4 text-sm text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none', className)}
       {...props}
     />
   )
@@ -93,7 +93,7 @@ export function Input({ className, ...props }) {
 export function Select({ className, children, ...props }) {
   return (
     <select
-      className={cx('h-10 w-full rounded-lg border border-line bg-bg px-2.5 text-sm text-ink focus:border-accent focus:outline-none', className)}
+      className={cx('h-10 w-full rounded-xl border border-line-strong bg-subtle px-3 text-sm text-ink focus:border-accent focus:outline-none', className)}
       {...props}
     >
       {children}
@@ -120,7 +120,7 @@ export function ErrorNote({ error }) {
 
 export function Empty({ title, children }) {
   return (
-    <div className="rounded-xl border border-dashed border-line px-6 py-14 text-center">
+    <div className="rounded-2xl border border-dashed border-line-strong px-6 py-14 text-center">
       <p className="font-medium">{title}</p>
       {children && <div className="mt-1 text-sm text-ink-2">{children}</div>}
     </div>
@@ -129,10 +129,10 @@ export function Empty({ title, children }) {
 
 export function Section({ title, aside, children, className }) {
   return (
-    <section className={cx('mt-10', className)}>
+    <section className={cx('mt-12', className)}>
       {(title || aside) && (
-        <div className="mb-3 flex items-baseline justify-between gap-4">
-          {title && <h2 className="text-lg font-semibold tracking-tight">{title}</h2>}
+        <div className="mb-4 flex items-baseline justify-between gap-4">
+          {title && <h2 className="text-xl tracking-[-0.03em]">{title}</h2>}
           {aside}
         </div>
       )}
@@ -144,9 +144,9 @@ export function Section({ title, aside, children, className }) {
 export function Pagination({ page, pages, onPage }) {
   if (pages <= 1) return null
   return (
-    <nav className="mt-4 flex items-center justify-between gap-2 text-sm" aria-label="Paginación">
+    <nav className="mt-5 flex items-center justify-between gap-2 text-sm" aria-label="Paginación">
       <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => onPage(page - 1)}>Anterior</Button>
-      <span className="text-ink-3">Página <span className="num">{page}</span> de <span className="num">{pages}</span></span>
+      <span className="eyebrow">Página <span className="num">{page}</span> de <span className="num">{pages}</span></span>
       <Button variant="secondary" size="sm" disabled={page >= pages} onClick={() => onPage(page + 1)}>Siguiente</Button>
     </nav>
   )

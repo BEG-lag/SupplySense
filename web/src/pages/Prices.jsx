@@ -100,15 +100,16 @@ export function PriceCategory() {
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={serie} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
                 <CartesianGrid stroke="var(--line)" vertical={false} />
-                <XAxis dataKey="anio" tick={{ fill: 'var(--ink-3)', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis tickFormatter={formatMXNShort} tick={{ fill: 'var(--ink-3)', fontSize: 12 }} axisLine={false} tickLine={false} width={72} />
+                <XAxis dataKey="anio" tick={{ fill: 'var(--fg-3)', fontSize: 12, fontFamily: 'var(--mono)' }} axisLine={false} tickLine={false} />
+                <YAxis tickFormatter={formatMXNShort} tick={{ fill: 'var(--fg-3)', fontSize: 12, fontFamily: 'var(--mono)' }} axisLine={false} tickLine={false} width={72} />
                 <Tooltip
-                  contentStyle={{ background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 12 }}
+                  contentStyle={{ background: 'var(--ink-2)', border: '1px solid var(--line-strong)', borderRadius: 12, fontSize: 12, color: 'var(--fg)' }}
+                  labelStyle={{ color: 'var(--fg-3)' }}
                   formatter={(v, name) => (Array.isArray(v) ? [`${formatMXNShort(v[0])} a ${formatMXNShort(v[1])}`, 'P25 a P75'] : [formatMXNShort(v), name])}
                   labelFormatter={(l) => `Año ${l}`}
                 />
                 <Area dataKey="rango" stroke="none" fill="var(--chart-3)" name="P25 a P75" />
-                <Line dataKey="p50" stroke="var(--chart-1)" strokeWidth={2} dot={{ r: 3 }} name="Mediana" />
+                <Line dataKey="p50" stroke="var(--chart-1)" strokeWidth={2} dot={{ r: 3, fill: 'var(--ink)', stroke: 'var(--chart-1)' }} name="Mediana" />
               </ComposedChart>
             </ResponsiveContainer>
           </Card>

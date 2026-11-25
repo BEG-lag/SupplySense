@@ -19,13 +19,13 @@ function SearchHero({ meta }) {
   return (
     <div className="mx-auto max-w-3xl py-6 text-center sm:py-10">
       {meta && (
-        <p className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-line px-3 py-1 text-[13px] text-ink-2">
-          <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--open)' }} />
-          <span className="num font-medium text-ink">{formatNumber(meta.totales.abiertas)}</span> convocatorias abiertas · CFE, PEMEX y ComprasMX
+        <p className="eyebrow mx-auto mb-7 inline-flex items-center gap-2.5 rounded-full border border-line px-3.5 py-1.5">
+          <span className="live" aria-hidden />
+          <span className="text-accent">{formatNumber(meta.totales.abiertas)}</span> convocatorias abiertas · CFE, PEMEX y ComprasMX
         </p>
       )}
-      <h1 className="text-[34px] font-semibold leading-[1.1] tracking-[-0.03em] sm:text-[46px]">
-        Licitaciones de energía y O&amp;G, con lo que ya se pagó por lo mismo
+      <h1 className="text-[38px] leading-[1] tracking-[-0.05em] sm:text-[60px]">
+        Licitaciones de energía y O&amp;G, con <em>lo que ya se pagó</em> por lo mismo
       </h1>
       <p className="mx-auto mt-4 max-w-2xl text-[16px] leading-relaxed text-ink-2 sm:text-[17px]">
         Cada mañana reunimos las convocatorias abiertas de CFE, PEMEX y el sector energía, y las
@@ -42,12 +42,12 @@ function SearchHero({ meta }) {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="¿Qué vendes? Ej. válvulas de compuerta"
-          className="h-12 min-w-0 flex-1 rounded-lg border border-line bg-bg px-4 text-[15px] placeholder:text-ink-3 focus:border-accent focus:outline-none"
+          className="h-12 min-w-0 flex-1 rounded-full border border-line-strong bg-subtle px-5 text-[15px] text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none"
         />
         <Button type="submit" size="lg">Buscar</Button>
       </form>
-      <div className="mt-3 flex flex-wrap justify-center gap-1.5 text-[13px] text-ink-3">
-        <span>Prueba:</span>
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-1.5 text-[13px] text-ink-3">
+        <span className="eyebrow">Prueba</span>
         {EXAMPLES.map((ex) => (
           <button key={ex} type="button" onClick={() => go(ex)} className="rounded-full border border-line px-2.5 py-0.5 text-ink-2 hover:border-accent hover:text-accent">
             {ex}
