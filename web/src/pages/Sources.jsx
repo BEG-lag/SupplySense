@@ -42,8 +42,8 @@ export default function Sources() {
   return (
     <>
       <PageHeader eyebrow="Fuentes y método" title="De dónde sale cada dato">
-        SupplySense no inventa ni estima convocatorias: reúne lo que publican ComprasMX, CFE y PEMEX,
-        lo ordena y lo cruza. Cada registro liga a su fuente oficial.
+        SupplySense no inventa ni estima convocatorias: reúne lo que publican ComprasMX, CFE, PEMEX y
+        los portales de compras de Jalisco, CDMX y Campeche, lo ordena y lo cruza. Cada registro liga a su fuente oficial.
       </PageHeader>
 
       <div className="grid gap-4">
