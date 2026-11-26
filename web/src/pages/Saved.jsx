@@ -22,7 +22,7 @@ function Fresh({ n, label = 'nuevas' }) {
 function Row({ title, subtitle, right, to, onOpen, onRemove }) {
   return (
     <Card className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="min-w-0">
+      <div className="min-w-0 [overflow-wrap:anywhere]">
         <div className="font-medium">{title}</div>
         <div className="text-[13px] text-ink-3">{subtitle}</div>
       </div>

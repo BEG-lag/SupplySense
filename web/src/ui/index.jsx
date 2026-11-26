@@ -35,7 +35,7 @@ export function PageHeader({ eyebrow, title, children, actions }) {
 export function Stat({ value, label, hint }) {
   return (
     <div className="min-w-0">
-      <div className="text-[28px] font-[650] leading-none tracking-[-0.05em] tabular-nums sm:text-[34px]">{value}</div>
+      <div className="text-[22px] font-[650] leading-none tracking-[-0.05em] tabular-nums sm:text-[34px]">{value}</div>
       <div className="mt-2 text-[13px] text-ink-2">{label}</div>
       {hint && <div className="eyebrow mt-1 !text-[10px]">{hint}</div>}
     </div>
@@ -76,7 +76,7 @@ export function Tag({ children, to, tone = 'neutral', className }) {
     warn: '',
   }
   const style = tone === 'warn' ? { color: 'var(--warn)', background: 'var(--warn-bg)' } : undefined
-  const cls = cx('inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs', tones[tone], className)
+  const cls = cx('inline-flex items-center rounded-full px-2.5 py-0.5 text-xs [overflow-wrap:anywhere] sm:whitespace-nowrap', tones[tone], className)
   if (to) return <Link to={to} className={cx(cls, 'transition-colors hover:border-accent hover:text-accent')} style={style}>{children}</Link>
   return <span className={cls} style={style}>{children}</span>
 }

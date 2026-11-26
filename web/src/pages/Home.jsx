@@ -78,7 +78,7 @@ export default function Home() {
       <SearchHero meta={meta} />
 
       {meta && (
-        <Card className="grid grid-cols-2 gap-6 bg-subtle p-6 sm:grid-cols-4">
+        <Card className="grid grid-cols-1 gap-6 bg-subtle p-6 min-[370px]:grid-cols-2 sm:grid-cols-4">
           <Stat value={formatNumber(meta.totales.abiertas)} label="Convocatorias abiertas" />
           <Stat value={formatNumber(meta.totales.nuevas_hoy)} label="Nuevas hoy" />
           <Stat value={formatNumber(meta.totales.cierran_48h)} label="Abren propuestas en 48 h" hint="Donde la fuente publica la fecha" />

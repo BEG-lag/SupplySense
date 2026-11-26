@@ -156,7 +156,7 @@ export default function Search() {
         <Button type="submit">Buscar</Button>
       </form>
 
-      <div className="grid gap-6 lg:grid-cols-[230px_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[230px_1fr]">
         <aside className="grid grid-cols-2 content-start gap-3 sm:grid-cols-3 lg:grid-cols-1" aria-label="Filtros">
           <Filter label="Sector" value={filters.sector} onChange={(v) => update({ sector: v })}>
             <option value="">Todos los giros</option>

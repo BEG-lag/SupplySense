@@ -34,7 +34,7 @@ export function BuyersIndex() {
       {loading && <Loading />}
       {error && <ErrorNote error={error} />}
       {data && (
-        <div className="overflow-x-auto rounded-xl border border-line">
+        <div className="overflow-x-auto rounded-xl border border-line" role="region" aria-label="Compradores" tabIndex={0}>
           <table className="w-full text-sm">
             <thead className="bg-subtle text-left text-xs text-ink-3">
               <tr><th className="px-4 py-2 font-medium">Comprador</th><th className="px-4 py-2 text-right font-medium">Abiertas</th><th className="px-4 py-2 text-right font-medium">Procedimientos</th><th className="px-4 py-2 text-right font-medium">Adjudicado</th></tr>
@@ -82,12 +82,12 @@ export function Buyer() {
           </>
         )}
       />
-      <Card className="grid grid-cols-2 gap-6 bg-subtle p-6 sm:grid-cols-3">
+      <Card className="grid grid-cols-1 gap-6 bg-subtle p-6 min-[370px]:grid-cols-2 sm:grid-cols-3">
         <Stat value={formatNumber(b.abiertas)} label="Convocatorias abiertas" />
         <Stat value={formatNumber(b.procedimientos)} label="Procedimientos registrados" />
         <Stat value={b.adjudicado ? formatMXNShort(b.adjudicado) : 'N/D'} label="Adjudicado" hint={b.id.startsWith('pemex') ? 'PEMEX no publica montos' : undefined} />
       </Card>
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Section title="Qué compra">
           <div className="flex flex-wrap gap-2">
             {b.categorias.map(([cat, n]) => <Tag key={cat} tone="accent" to={`/buscar?comprador=${b.id}&categoria=${cat}`}>{categoryName(meta, cat)} · {formatNumber(n)}</Tag>)}
@@ -103,7 +103,7 @@ export function Buyer() {
             <Card className="divide-y divide-line">
               {b.proveedores.map(([key, name, n]) => (
                 <Link key={key} to={`/empresa/${key}`} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm hover:bg-subtle">
-                  <span className="min-w-0 truncate">{name}</span>
+                  <span className="min-w-0 [overflow-wrap:anywhere] sm:truncate" title={name}>{name}</span>
                   <span className="num shrink-0 text-ink-3">{formatNumber(n)}</span>
                 </Link>
               ))}

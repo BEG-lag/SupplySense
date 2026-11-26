@@ -28,7 +28,7 @@ export default function Winners() {
         Las adjudicaciones más recientes del gobierno federal en ComprasMX y de CFE, con monto y
         comprador. Cada empresa tiene su historial.
       </PageHeader>
-      <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_300px]">
         <div className="min-w-0">
           <div className="mb-3 flex flex-wrap items-center gap-3">
             <label htmlFor="sec-g" className="text-sm text-ink-3">Sector</label>
@@ -53,7 +53,7 @@ export default function Winners() {
                       ))}
                       {a.ganadores.length > 3 && <span className="text-ink-3">y {a.ganadores.length - 3} más</span>}
                     </div>
-                    <Link to={`/licitacion/${encodeURIComponent(a.procedimiento_id || a.id)}`} className="mt-0.5 block text-sm text-ink-2 hover:text-accent">Ganó: {displayTitle(a.titulo)}</Link>
+                    <Link to={`/licitacion/${encodeURIComponent(a.procedimiento_id || a.id)}`} className="mt-0.5 block text-sm text-ink-2 [overflow-wrap:anywhere] hover:text-accent">Ganó: {displayTitle(a.titulo)}</Link>
                     <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-ink-3">
                       <span>{buyerName(meta, a.comprador_id)}</span>
                       {a.entidad && <span>· {a.entidad}</span>}
@@ -76,7 +76,7 @@ export default function Winners() {
             <Card className="divide-y divide-line">
               {(sector === 'energia' ? data.top_anual_energia : data.top_anual).slice(0, 15).map((c, i) => (
                 <Link key={c.id} to={`/empresa/${c.id}`} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm hover:bg-subtle">
-                  <span className="min-w-0 truncate"><span className="num mr-2 text-ink-3">{i + 1}</span>{c.nombre}</span>
+                  <span className="min-w-0 [overflow-wrap:anywhere] sm:truncate" title={c.nombre}><span className="num mr-2 text-ink-3">{i + 1}</span>{c.nombre}</span>
                   <span className="num shrink-0 text-ink-2">{formatMXNShort(c.monto)}</span>
                 </Link>
               ))}

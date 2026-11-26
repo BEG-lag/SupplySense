@@ -22,13 +22,16 @@ export default function PriceRange({ percentiles, mark, markLabel = 'Tu monto' }
         <div className="absolute inset-y-0 rounded-full" style={{ left: `${p25}%`, width: `${p75 - p25}%`, background: 'var(--chart-2)' }} />
         <div className="absolute -inset-y-1 w-0.5 rounded" style={{ left: `${p50}%`, background: 'var(--chart-1)' }} />
         {m != null && (
-          <div className="absolute -top-6 -translate-x-1/2 text-center" style={{ left: `${m}%` }}>
+          // En celular la etiqueta se recorre hacia adentro cerca de los extremos (se desplaza el
+          // m % de su ancho en vez del 50 %) para no salirse de la pantalla; la línea sigue en el monto.
+          <div className="absolute -top-6 translate-x-(--recorre) text-center sm:-translate-x-1/2" style={{ left: `${m}%`, '--recorre': `${-m}%`, '--punto': `${m}%` }}>
             <div className="whitespace-nowrap rounded-full bg-papel px-2 py-0.5 text-[11px] font-semibold text-tinta">{markLabel}</div>
-            <div className="mx-auto h-5 w-0.5 bg-papel" />
+            <div className="ml-(--punto) h-5 w-0.5 -translate-x-1/2 bg-papel sm:mx-auto sm:translate-x-0" />
           </div>
         )}
       </div>
-      <div className="num mt-2 grid grid-cols-5 text-[11px] text-ink-3">
+      {/* En celular los cinco valores fluyen en renglones; desde sm, cinco columnas. */}
+      <div className="num mt-2 flex flex-wrap justify-between gap-x-3 gap-y-1 text-[11px] text-ink-3 sm:grid sm:grid-cols-5 sm:gap-0">
         <span>P5 {formatMXNShort(lo)}</span>
         <span className="text-center">P25 {formatMXNShort(percentiles['25'])}</span>
         <span className="text-center font-medium text-accent">Mediana {formatMXNShort(percentiles['50'])}</span>

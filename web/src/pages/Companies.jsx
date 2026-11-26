@@ -36,7 +36,7 @@ export function CompaniesIndex() {
       {data && rows.length === 0 && <Empty title="Sin coincidencias" />}
       {rows.length > 0 && (
         <>
-          <div className="overflow-x-auto rounded-xl border border-line">
+          <div className="overflow-x-auto rounded-xl border border-line" role="region" aria-label="Empresas" tabIndex={0}>
             <table className="w-full text-sm">
               <thead className="bg-subtle text-left text-xs text-ink-3">
                 <tr><th className="px-4 py-2 font-medium">Empresa</th><th className="px-4 py-2 font-medium">Categoría principal</th><th className="px-4 py-2 text-right font-medium">Adjudicaciones</th><th className="px-4 py-2 text-right font-medium">Monto</th></tr>
@@ -80,12 +80,12 @@ export function Company() {
         {c.rfc && <span className="num mr-3">RFC {c.rfc}</span>}
         {c.otros_nombres.length > 0 && <span className="text-ink-3">También aparece como {c.otros_nombres.join(', ')}</span>}
       </PageHeader>
-      <Card className="grid grid-cols-2 gap-6 bg-subtle p-6 sm:grid-cols-3">
+      <Card className="grid grid-cols-1 gap-6 bg-subtle p-6 min-[370px]:grid-cols-2 sm:grid-cols-3">
         <Stat value={formatNumber(c.n)} label="Adjudicaciones" />
         <Stat value={formatMXNShort(c.monto)} label="Monto adjudicado" hint="Compartidas, en partes iguales" />
         <Stat value={c.adjudicaciones[0] ? formatDate(c.adjudicaciones[0].fecha) : 'N/D'} label="Última adjudicación" />
       </Card>
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Section title="Categorías">
           <div className="flex flex-wrap gap-2">
             {c.categorias.map(([cat, n]) => <Tag key={cat} tone="accent" to={`/precios/${cat}`}>{categoryName(meta, cat)} · {n}</Tag>)}
@@ -98,7 +98,7 @@ export function Company() {
         </Section>
       </div>
       <Section title="Adjudicaciones">
-        <div className="overflow-x-auto rounded-xl border border-line">
+        <div className="overflow-x-auto rounded-xl border border-line" role="region" aria-label="Adjudicaciones de la empresa" tabIndex={0}>
           <table className="w-full text-sm">
             <thead className="bg-subtle text-left text-xs text-ink-3">
               <tr><th className="px-4 py-2 font-medium">Procedimiento</th><th className="px-4 py-2 font-medium">Fecha</th><th className="px-4 py-2 text-right font-medium">Monto</th></tr>

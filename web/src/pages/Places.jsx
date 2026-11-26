@@ -68,7 +68,7 @@ export function StatePage() {
         <Stat value={formatNumber(energy)} label="De energía y O&G" />
         <Stat value={formatNumber(top(open, 'comprador_id', 1000).length)} label="Compradores con convocatorias" />
       </Card>
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Section title="Giros con más convocatorias">
           <div className="flex flex-wrap gap-2">
             {top(open, 'categoria').map(([c, n]) => <Tag key={c} to={`/giro/${c}`}>{categoryName(meta, c)} · {n}</Tag>)}

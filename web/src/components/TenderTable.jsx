@@ -87,7 +87,7 @@ export default function TenderTable({ records, showWinner = false, viaGiro, viaS
         {records.map((rec) => (
           <li key={rec.id} className="rounded-xl border border-line p-4">
             <div className="flex items-start justify-between gap-3">
-              <Link to={href(rec.id)} className="font-medium leading-snug hover:text-accent">{displayTitle(rec.titulo)}</Link>
+              <Link to={href(rec.id)} className="min-w-0 font-medium leading-snug [overflow-wrap:anywhere] hover:text-accent">{displayTitle(rec.titulo)}</Link>
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
               <Status rec={rec} meta={meta} today={today} />

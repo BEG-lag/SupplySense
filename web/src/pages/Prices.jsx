@@ -131,7 +131,7 @@ export function PriceCategory() {
         </Section>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {data.por_tipo.length > 0 && (
           <Section title="Por tipo de contratación">
             <Card className="divide-y divide-line">
@@ -148,7 +148,7 @@ export function PriceCategory() {
           <Card className="divide-y divide-line">
             {data.ganadores.slice(0, 10).map((g, i) => (
               <Link key={g.id} to={`/empresa/${g.id}`} className="flex items-center justify-between gap-4 px-4 py-3 text-sm hover:bg-subtle">
-                <span className="min-w-0 truncate"><span className="num mr-2 text-ink-3">{i + 1}</span>{g.nombre}</span>
+                <span className="min-w-0 [overflow-wrap:anywhere] sm:truncate" title={g.nombre}><span className="num mr-2 text-ink-3">{i + 1}</span>{g.nombre}</span>
                 <span className="num shrink-0">{formatMXNShort(g.monto)}</span>
               </Link>
             ))}
@@ -157,7 +157,7 @@ export function PriceCategory() {
       </div>
 
       <Section title="Adjudicaciones recientes">
-        <div className="overflow-x-auto rounded-xl border border-line">
+        <div className="overflow-x-auto rounded-xl border border-line" role="region" aria-label="Adjudicaciones recientes" tabIndex={0}>
           <table className="w-full text-sm">
             <thead className="bg-subtle text-left text-xs text-ink-3">
               <tr><th className="px-4 py-2 font-medium">Procedimiento</th><th className="px-4 py-2 font-medium">Ganador</th><th className="px-4 py-2 font-medium">Fecha</th><th className="px-4 py-2 text-right font-medium">Monto</th></tr>

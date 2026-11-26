@@ -108,8 +108,8 @@ export default function Tender() {
         <Tag tone="accent" to={`/precios/${rec.categoria}`}>{categoryName(meta, rec.categoria)}</Tag>
         {closing && <Tag tone="warn">{closing}</Tag>}
       </div>
-      <h1 className="mt-3 max-w-4xl text-[24px] font-semibold leading-snug tracking-[-0.02em] sm:text-[30px]">{displayTitle(rec.titulo)}</h1>
-      {rec.descripcion && <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-ink-2">{displayTitle(rec.descripcion)}</p>}
+      <h1 className="mt-3 max-w-4xl text-[24px] font-semibold leading-snug tracking-[-0.02em] [overflow-wrap:anywhere] sm:text-[30px]">{displayTitle(rec.titulo)}</h1>
+      {rec.descripcion && <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-ink-2 [overflow-wrap:anywhere]">{displayTitle(rec.descripcion)}</p>}
       <div className="mt-5 flex flex-wrap items-center gap-2">
         <OfficialLink rec={rec} />
         <FollowButton tipo="licitacion" id={rec.id} nombre={rec.titulo} snapshot={{ estatus: status }} />
@@ -162,7 +162,7 @@ export default function Tender() {
             <ul className="divide-y divide-line">
               {rec.similares.map((s) => (
                 <li key={s.id} className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-                  <div className="min-w-0">
+                  <div className="min-w-0 [overflow-wrap:anywhere]">
                     <Link to={`/licitacion/${encodeURIComponent(s.procedimiento_id || s.id)}`} className="text-sm font-medium hover:text-accent">{displayTitle(s.titulo)}</Link>
                     <div className="mt-0.5 text-xs text-ink-2">
                       {s.ganadores.slice(0, 2).join(', ')}{s.ganadores.length > 2 ? ` y ${s.ganadores.length - 2} más` : ''} · {buyerName(meta, s.comprador_id)} · {formatDate(s.fecha)}
@@ -181,7 +181,7 @@ export default function Tender() {
           title="Contratos de este procedimiento"
           aside={rec.contratos_total ? <span className="eyebrow">Los {rec.contratos.length} de mayor monto de {rec.contratos_total} · total {formatMXNShort(rec.contratos_monto_total)}</span> : null}
         >
-          <div className="overflow-x-auto rounded-xl border border-line">
+          <div className="overflow-x-auto rounded-xl border border-line" role="region" aria-label="Contratos de este procedimiento" tabIndex={0}>
             <table className="w-full text-sm">
               <thead className="bg-subtle text-left text-xs text-ink-3">
                 <tr><th className="px-4 py-2 font-medium">Proveedor</th><th className="px-4 py-2 font-medium">Firma</th><th className="px-4 py-2 text-right font-medium">Monto sin IVA</th></tr>
