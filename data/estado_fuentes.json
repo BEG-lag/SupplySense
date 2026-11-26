@@ -1,4 +1,8 @@
 {
+  "banxico": {
+    "registros": 977,
+    "ultima_ok": "2026-11-26"
+  },
   "campeche": {
     "registros": 335,
     "ultima_ok": "2026-11-25"
@@ -20,12 +24,28 @@
     },
     "ultima_ok": "2026-11-25"
   },
+  "dof": {
+    "registros": 62,
+    "ultima_ok": "2026-11-26"
+  },
   "fix": {
     "ultima_ok": "2026-11-25"
+  },
+  "guanajuato": {
+    "registros": 2301,
+    "ultima_ok": "2026-11-26"
   },
   "jalisco": {
     "registros": 131,
     "ultima_ok": "2026-11-25"
+  },
+  "nuevo_leon": {
+    "registros": 521,
+    "ultima_ok": "2026-11-26"
+  },
+  "oaj": {
+    "registros": 605,
+    "ultima_ok": "2026-11-26"
   },
   "pemex": {
     "registros": 11926,

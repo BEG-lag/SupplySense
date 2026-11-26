@@ -33,6 +33,11 @@ def test_ids_match_source(procs, contracts):
             "jalisco": "jal:",
             "cdmx": "cdmx:",
             "campeche": "camp:",
+            "guanajuato": "gto:",
+            "nuevo_leon": "nl:",
+            "banxico": "bmx:",
+            "oaj": "oaj:",
+            "dof": "dof:",
         }[rec["fuente"]]
         assert rec["id"].startswith(prefix), rec["id"]
 

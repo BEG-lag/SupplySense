@@ -29,8 +29,9 @@ function SearchHero({ meta }) {
       </h1>
       <p className="mx-auto mt-4 max-w-2xl text-[16px] leading-relaxed text-ink-2 sm:text-[17px]">
         Cada mañana reunimos las convocatorias abiertas de todo el gobierno federal en ComprasMX,
-        más CFE, PEMEX y los portales de Jalisco, CDMX y Campeche, y las cruzamos con más de 300
-        mil adjudicaciones: quién ganó, a qué precio y para qué comprador.
+        más CFE, PEMEX, cinco portales estatales, Banxico, el Poder Judicial y los resúmenes del
+        DOF, y las cruzamos con más de 300 mil adjudicaciones: quién ganó, a qué precio y para
+        qué comprador.
       </p>
       <form
         className="mx-auto mt-7 flex max-w-xl gap-2"

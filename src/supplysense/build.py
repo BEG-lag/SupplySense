@@ -75,11 +75,45 @@ SOURCE_LABELS = {
     "jalisco": "Jalisco",
     "cdmx": "CDMX",
     "campeche": "Campeche",
+    "guanajuato": "Guanajuato",
+    "nuevo_leon": "Nuevo León",
+    "banxico": "Banxico",
+    "oaj": "Poder Judicial (OAJ)",
+    "dof": "DOF",
 }
-# Portales estatales: compras con recursos propios. Prefijo para el id del comprador.
-STATE_SOURCES = {"jalisco": "jal", "cdmx": "cdmx", "campeche": "camp"}
-# Una estatal sin fechas se da por concluida después de este tiempo [SUPUESTO].
+# Portales propios (estados, organismos autónomos y resúmenes del DOF): lo que se compra fuera
+# de ComprasMX. Prefijo para el id del comprador.
+STATE_SOURCES = {
+    "jalisco": "jal",
+    "cdmx": "cdmx",
+    "campeche": "camp",
+    "guanajuato": "gto",
+    "nuevo_leon": "nl",
+    "banxico": "bmx",
+    "oaj": "oaj",
+    "dof": "dof",
+}
+# Ámbito de cada fuente, para agruparlas en el sitio.
+SOURCE_SCOPE = {
+    "comprasmx": "federal",
+    "cfe": "federal",
+    "pemex": "federal",
+    "jalisco": "estatal",
+    "cdmx": "estatal",
+    "campeche": "estatal",
+    "guanajuato": "estatal",
+    "nuevo_leon": "estatal",
+    "banxico": "autonomo",
+    "oaj": "autonomo",
+    "dof": "dof",
+}
+# Fuentes cuyo estatus de "abierta" viene de la propia fuente (no se estima).
+OFFICIAL_STATUS = {"jalisco", "nuevo_leon", "banxico"}
+# Adjudicaciones con ganador y monto en el propio procedimiento.
+AWARD_SOURCES = {"cfe", "nuevo_leon"}
+# Una abierta sin fecha de apertura se da por concluida después de este tiempo [SUPUESTO].
 STATE_STALE_DAYS = 60
+STALE_DAYS = {"guanajuato": 30, "oaj": 30, "dof": 30}
 _WORD = re.compile(r"[a-z0-9]{4,}")
 _STOP = {
     "para",
@@ -243,7 +277,7 @@ def buyer_of(rec: dict[str, Any], cfe_names: dict[str, str]) -> tuple[str, str]:
         state = SOURCE_LABELS[rec["fuente"]]
         label = (
             name
-            if state.lower() in fold(name) or rec["fuente"] == "campeche"
+            if fold(state) in fold(name) or rec["fuente"] in ("campeche", "dof", "banxico", "oaj")
             else f"{name} ({state})"
         )
         return f"{STATE_SOURCES[rec['fuente']]}-{slug(name)}", label
@@ -253,6 +287,11 @@ def buyer_of(rec: dict[str, Any], cfe_names: dict[str, str]) -> tuple[str, str]:
         return slug(buyer.siglas), buyer.nombre
     name = title_name(rec.get("comprador")) or siglas or "Sin comprador"
     return slug(siglas or name), name
+
+
+def number_key(numero: str | None) -> str:
+    """Número de procedimiento comparable entre fuentes: sin espacios ni signos."""
+    return re.sub(r"[^a-z0-9]", "", fold(numero))
 
 
 def final_status(rec: dict[str, Any], today: date) -> tuple[str, bool]:
@@ -266,9 +305,15 @@ def final_status(rec: dict[str, Any], today: date) -> tuple[str, bool]:
         return "aviso", True
     status = rec.get("estatus") or "otro"
     iso = today.isoformat()
+    if rec["fuente"] in STATE_SOURCES and status == "en_evaluacion":
+        # En evaluación sin novedad por meses: el procedimiento ya terminó.
+        last = day_of(rec.get("apertura") or rec.get("publicado"))
+        if last and (today - date.fromisoformat(last)).days > STATE_STALE_DAYS:
+            return "concluida", True
+        return status, rec["fuente"] not in OFFICIAL_STATUS
     if rec["fuente"] in STATE_SOURCES and status == "abierta":
-        # Los portales estatales solo muestran lo vigente: el estatus sale de las fechas.
-        estimated = rec["fuente"] != "jalisco"
+        # Los portales propios solo muestran lo vigente: el estatus sale de las fechas.
+        estimated = rec["fuente"] not in OFFICIAL_STATUS
         if rec.get("fallo") and rec["fallo"][:10] < iso:
             return "concluida", True
         if rec.get("apertura") and rec["apertura"][:10] < iso:
@@ -277,7 +322,8 @@ def final_status(rec: dict[str, Any], today: date) -> tuple[str, bool]:
             return "abierta", estimated
         published = day_of(rec.get("publicado"))
         if published:
-            if (today - date.fromisoformat(published)).days > STATE_STALE_DAYS:
+            stale_days = STALE_DAYS.get(rec["fuente"], STATE_STALE_DAYS)
+            if (today - date.fromisoformat(published)).days > stale_days:
                 return "concluida", True
             return "abierta", estimated
         # Sin ninguna fecha: si el año del número ya pasó, concluida; si no, solo un aviso.
@@ -322,12 +368,24 @@ def prepare(root: Path, today: date, cache_dir: Path = RAW_DIR) -> dict[str, Any
     cmx_procs, cmx_contracts, missing = load_comprasmx(cache_dir, seen, today)
     procs.update({r["id"]: r for r in cmx_procs})
     contracts.update({r["id"]: r for r in cmx_contracts})
-    # Lo que un portal estatal publica con número federal ya viene en ComprasMX: no se duplica.
-    federal_numbers = {fold(r.get("numero")) for r in cmx_procs if r.get("numero")}
+    # Lo que un portal propio publica con número federal ya viene en ComprasMX, y lo que el DOF
+    # resume de un portal que ya leemos (Banxico, OAJ…) tampoco se repite.
+    federal_numbers = {number_key(r.get("numero")) for r in cmx_procs if r.get("numero")}
+    portal_numbers = {
+        number_key(r.get("numero"))
+        for r in procs.values()
+        if r["fuente"] in STATE_SOURCES and r["fuente"] != "dof" and r.get("numero")
+    }
+    federal_numbers.discard("")
+    portal_numbers.discard("")
     duplicates = [
         k
         for k, r in procs.items()
-        if r["fuente"] in STATE_SOURCES and fold(r.get("numero")) in federal_numbers
+        if r["fuente"] in STATE_SOURCES
+        and (
+            number_key(r.get("numero")) in federal_numbers
+            or (r["fuente"] == "dof" and number_key(r.get("numero")) in portal_numbers)
+        )
     ]
     for key in duplicates:
         del procs[key]
@@ -377,13 +435,17 @@ def build_awards(
     procedimiento) y contratos de ComprasMX (un monto por contrato, en dólares → FIX)."""
     awards: list[dict[str, Any]] = []
     for rec in procs.values():
-        if rec["fuente"] != "cfe" or rec.get("estatus") != "adjudicada" or not rec.get("monto"):
+        if (
+            rec["fuente"] not in AWARD_SOURCES
+            or rec.get("estatus") != "adjudicada"
+            or not rec.get("monto")
+        ):
             continue
         awards.append(
             {
                 "id": rec["id"],
                 "procedimiento_id": rec["id"],
-                "fuente": "cfe",
+                "fuente": rec["fuente"],
                 "titulo": rec["titulo"],
                 "numero": rec["numero"],
                 "categoria": rec["categoria"],
@@ -1008,6 +1070,7 @@ def build_site(
         "fuentes": {
             f: {
                 "nombre": SOURCE_LABELS[f],
+                "ambito": SOURCE_SCOPE[f],
                 "procedimientos": counts.get(f, 0),
                 "abiertas": open_counts.get(f, 0),
                 "ultima_ok": (estado.get(f) or {}).get("ultima_ok"),

@@ -20,6 +20,11 @@ SOURCES = {
     "jalisco": "Jalisco",
     "cdmx": "CDMX",
     "campeche": "Campeche",
+    "guanajuato": "Guanajuato",
+    "nuevo_leon": "Nuevo León",
+    "banxico": "Banxico",
+    "oaj": "Poder Judicial (OAJ)",
+    "dof": "DOF",
 }
 
 

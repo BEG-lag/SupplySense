@@ -42,6 +42,11 @@ function OfficialLink({ rec }) {
     jalisco: 'Ver en Compras Jalisco',
     cdmx: 'Ver en Concurso Digital CDMX',
     campeche: 'Descargar la convocatoria (PDF)',
+    guanajuato: rec.url?.toLowerCase().endsWith('.pdf') ? 'Descargar la convocatoria (PDF)' : 'Ver en el portal de Guanajuato',
+    nuevo_leon: 'Ver la subasta en Nuevo León',
+    banxico: 'Abrir el Portal de Proveedores de Banxico',
+    oaj: 'Ver la convocatoria del OAJ',
+    dof: 'Ver el resumen en el DOF',
   }[rec.fuente]
   const url = officialUrl(rec)
   return (
@@ -132,7 +137,7 @@ export default function Tender() {
           <Fact label="Tipo de procedimiento">{rec.tipo_procedimiento}</Fact>
           <Fact label="Tipo de contratación">{rec.tipo_contratacion}</Fact>
           <Fact label="Carácter">{rec.caracter}</Fact>
-          <Fact label="Publicación">{formatDateTime(rec.publicado)}</Fact>
+          <Fact label="Publicación">{rec.publicado && formatDateTime(rec.publicado)}</Fact>
           <Fact label="Firma del contrato">{rec.firma && formatDate(rec.firma)}</Fact>
           <Fact label="Vigencia">{rec.inicio && `${formatDate(rec.inicio)} a ${formatDate(rec.fin)}`}</Fact>
           <Fact label={winners.length > 1 ? 'Ganadores' : 'Ganador'}>
@@ -146,6 +151,8 @@ export default function Tender() {
           </Fact>
           <Fact label="RFC del proveedor">{rec.proveedor_rfc && <span className="num">{rec.proveedor_rfc}</span>}</Fact>
           <Fact label="Monto adjudicado">{rec.monto && <span className="num">{formatMXN(rec.monto)}{rec.moneda && rec.moneda !== 'MXN' ? ` ${rec.moneda}` : ''}</span>}</Fact>
+          <Fact label="Precio base de la subasta">{rec.precio_base && <span className="num">{formatMXN(rec.precio_base)}{rec.monto ? ` · se adjudicó ${((1 - rec.monto / rec.precio_base) * 100).toFixed(1)}% abajo` : ''}</span>}</Fact>
+          <Fact label="Participantes">{rec.participantes?.length > 0 && <span>{rec.participantes.length}: {rec.participantes.join(', ')}</span>}</Fact>
           <Fact label="Testigo social">{rec.testigo_social ? 'Sí' : null}</Fact>
           <Fact label="Sector">{rec.sector === 'energia' ? `Energía y O&G (${(rec.motivo_alcance || '').replace('comprador:', 'comprador del sector: ').replace('palabra:', 'palabra de contexto: ')})` : 'General'}</Fact>
           <Fact label="Fuente">{SOURCE_NAMES[rec.fuente]} · visto por primera vez el {formatDate(rec.primera_vez)}</Fact>

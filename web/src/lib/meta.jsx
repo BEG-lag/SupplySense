@@ -21,5 +21,14 @@ export function buyerName(meta, id) {
   return meta?.compradores?.[id] || id
 }
 
-export const SOURCE_NAMES = { comprasmx: 'ComprasMX', cfe: 'CFE', pemex: 'PEMEX', jalisco: 'Jalisco', cdmx: 'CDMX', campeche: 'Campeche' }
-export const STATE_SOURCES = ['jalisco', 'cdmx', 'campeche']
+export const SOURCE_NAMES = {
+  comprasmx: 'ComprasMX', cfe: 'CFE', pemex: 'PEMEX',
+  jalisco: 'Jalisco', cdmx: 'CDMX', campeche: 'Campeche', guanajuato: 'Guanajuato', nuevo_leon: 'Nuevo León',
+  banxico: 'Banxico', oaj: 'Poder Judicial (OAJ)', dof: 'DOF',
+}
+// Portales estatales con compras de recursos propios.
+export const STATE_SOURCES = ['jalisco', 'cdmx', 'campeche', 'guanajuato', 'nuevo_leon']
+// Organismos que compran con normativa propia, fuera de ComprasMX.
+export const AUTONOMOUS_SOURCES = ['banxico', 'oaj']
+// Estados con su portal integrado (para la página de cada estado).
+export const STATES_WITH_PORTAL = ['Jalisco', 'Ciudad de México', 'Campeche', 'Guanajuato', 'Nuevo León']

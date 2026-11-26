@@ -1,0 +1,85 @@
+{
+ "total": 6,
+ "rows": [
+  {
+   "dar_id": "40803",
+   "licitacion_nombre": "Licitación Pública Nacional Mixta, para la Adquisición de Equipo de Cómputo y de Tecnología de la Información; Equipo de Comunicación y Telecomunicación; y Equipos de Generación Eléctrica, Aparatos y Accesorios Eléctricos",
+   "licitacion_fecha": "2026-11-02",
+   "licitacion_tipo": "Licitación Pública",
+   "dependencia_nombre": "Secretaría de Finanzas",
+   "licitacion_numero": "40051001-088-26 (CAGEG-088/2026)",
+   "finalidad": "Adquisición de Equipo de Cómputo y de Tecnología de la Información; Equipo de Comunicación y Telecomunicación; y Equipos de Generación Eléctrica, Aparatos y Accesorios Eléctricos",
+   "materia": "Adquisiciones",
+   "convocatoria": "1793628101_40051001-088-26.zip",
+   "junta": "1794955109_592-40051001-088-26-JA-T.pdf"
+  },
+  {
+   "dar_id": "31886",
+   "licitacion_nombre": "Licitación Pública Nacional Presencial Segunda Convocatoria, para la Contratación de los Servicios de Vigilancia y Limpieza para el Gobierno del Estado de Guanajuato, Dependencias y Entidades",
+   "licitacion_fecha": "2021-01-04",
+   "licitacion_tipo": "Licitación Pública",
+   "dependencia_nombre": "Secretaría de Finanzas",
+   "licitacion_numero": "40051001-108-20 (CAGEG-090/2020)",
+   "finalidad": "Contratación de los Servicios de Vigilancia y Limpieza para el Gobierno del Estado de Guanajuato, Dependencias y Entidades",
+   "materia": "Adquisiciones",
+   "convocatoria": "1609786139_basesyanexos40051001108202publicacin4deenero2021.zip",
+   "junta": "1610672941_1610504799_007-40051001-108-20-JA-T.pdf",
+   "apertura": "1611086858_022-40051001-108-20-A-T.pdf"
+  },
+  {
+   "dar_id": "31887",
+   "licitacion_nombre": "Licitación Pública Nacional Presencial para la adquisición de Estufas Ecológicas",
+   "licitacion_fecha": "2021-01-04",
+   "licitacion_tipo": "Licitación Pública",
+   "dependencia_nombre": "Secretaría de Finanzas",
+   "licitacion_numero": "40051001-107-20 (CAGEG-107/2020)",
+   "finalidad": "Adquisición de Estufas Ecológicas",
+   "materia": "Adquisiciones",
+   "convocatoria": "1609786684_basesanexosyconvolpn107.zip",
+   "junta": "1610673026_013-40051001-107-20-JA-T.pdf",
+   "fallo": "1612558768_054-40051001-107-20-F-T.pdf",
+   "apertura": "1612558707_029-40051001-107-20-A-T.pdf"
+  },
+  {
+   "dar_id": "31895",
+   "licitacion_nombre": "INVITACIÓN MIXTA DE ADJUDICACIÓN MEDIANTE INVITACIÓN CON COTIZACIÓN  DE TRES PROVEEDORES PARA LA ADQUISICIÓN DE MAQUINARIA Y EQUIPO INDUSTRIAL",
+   "licitacion_fecha": "2021-01-12",
+   "licitacion_tipo": "Adjudicación Directa",
+   "dependencia_nombre": "Secretaría de Finanzas",
+   "licitacion_numero": "M3E-45200121-2",
+   "finalidad": "ADQUISICIÓN DE MAQUINARIA Y EQUIPO INDUSTRIAL",
+   "materia": "Adquisiciones",
+   "convocatoria": "1610504894_basesyanexosm3e452001212.zip",
+   "junta": "1611240804_Preg-Resp M3E-45200121-2.pdf",
+   "fallo": "1611870813_Not de Result M3E-45200121-2.pdf"
+  },
+  {
+   "dar_id": "32128",
+   "licitacion_nombre": "\"CONSTRUCCIÓN DE LA INFRAESTRUCTURA EDUCATIVA\", EN LA PRIMARIA TURNO MATUTINO CON C.C.T. 11DPR3232N Y TURNO VESPERTINO CON C.C.T. 11DPR3982O, UBICADA EN LA LOCALIDAD LEÓN DE LOS ALDAMA, EN EL MUNICIPIO DE LEÓN, GTO. ",
+   "licitacion_fecha": "2021-04-20",
+   "licitacion_tipo": "Licitación Pública Federal",
+   "dependencia_nombre": "Instituto de Infraestructura Física Educativa de Guanajuato",
+   "licitacion_numero": "INIFEG/FIFONREGION/FED/LP/2020-02",
+   "finalidad": "\"CONSTRUCCIÓN DE 1 MÓDULO EN SISTEMA TRADICIONAL EN ESTRUCTURA U-2C, CONFORMADO POR: PLANTA BAJA: 1 MÓDULO DE ESCALERAS DE 1.00 E.E., 1 AULA AISLADA DE 2.00 E.E., 1 AULA ADOSADA DE 2.00 E.E., 1 MÓDULO SANITARIO ADOSADO DE 2.00 E.E., 2 AULAS ADOSADAS ",
+   "materia": "Obra Pública y Servicios Relacionados",
+   "convocatoria": "1618934713_CONVOCATORIA 02.pdf",
+   "junta": "1618934816_ACLARACIONES 02.pdf",
+   "apertura": "1618934850_APERTURA 02.pdf",
+   "fallo": "1618934893_FALLO 02.pdf"
+  },
+  {
+   "dar_id": "32162",
+   "licitacion_nombre": "\"CONSTRUCCIÓN Y REHABILITACIÓN DE PRIMERA ETAPA DE LA INFRAESTRUCTURA EDUCATIVA\", EN LA SECUNDARIA TÉCNICA NO. 39, CON C.C.T. 11DST0057P, UBICADA EN CALLE PAPAYA S/N, COL. LAS MANDARINAS, EN EL MUNICIPIO DE LEÓN, GTO. ",
+   "licitacion_fecha": "2021-04-20",
+   "licitacion_tipo": "Por Invtación I3",
+   "dependencia_nombre": "Instituto de Infraestructura Física Educativa de Guanajuato",
+   "licitacion_numero": "INIFEG/ESCUELAS AL CIEN/FED/I3/2020-09",
+   "finalidad": "\"CONSTRUCCIÓN DE PRIMERA ETAPA DE BARDA PERIMETRAL, MÁS PRIMERA ETAPA DE REHABILITACIÓN Y MANTENIMIENTO, MÁS OBRA COMPLEMENTARIA\", EN LA SECUNDARIA TÉCNICA NO. 39, CON C.C.T. 11DST0057P, UBICADA EN CALLE PAPAYA S/N, COL. LAS MANDARINAS, EN EL MUNICIP",
+   "materia": "Obra Pública y Servicios Relacionados",
+   "convocatoria": "1618946240_09 INVITACIÓN.pdf",
+   "junta": "1618946346_JUNTA DE ACLARACIONES 09.pdf",
+   "apertura": "1618946549_APERTURA 09.pdf",
+   "fallo": "1618946702_FALLO 09.pdf"
+  }
+ ]
+}

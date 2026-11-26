@@ -62,7 +62,12 @@ and oil & gas is its featured vertical. Every record links to its official sourc
 | Jalisco, state purchases | GREEN | Calls from the state purchasing portal, with clarification, opening and award dates |
 | Mexico City, Concurso Digital | GREEN | Calls from local agencies, with dates; status estimated from dates |
 | Campeche, SAFIN | AMBER | State tenders read from each call's PDF; health, public works and municipalities still missing |
-| State of Mexico and Tabasco | RED | Pending: Edomex needs JSF sessions and keeps dates in PDFs; Tabasco's portal did not respond |
+| Guanajuato, transparency portal | GREEN | State tenders since 2021; dates read from the call PDF (even inside a ZIP, fetching only that file with HTTP ranges) |
+| Nuevo León, reverse auctions | GREEN | Base price, winner, best offer and bidders for each auction since 2016 |
+| Banco de México | GREEN | Tenders and invitations since 2021 with the date of every stage |
+| Federal Judiciary (OAJ) | GREEN | Calls from its materials and facilities areas; it also buys for the Supreme Court |
+| DOF, tender notices | AMBER | Public tender summaries from bodies outside ComprasMX (universities, INE, Congress, states, cities) |
+| State of Mexico, Tabasco, Veracruz | RED | Edomex needs JSF sessions; Tabasco did not respond; Veracruz is behind an anti-bot CAPTCHA (not bypassed) |
 
 Endpoints, formats and quirks are documented in [`docs/fuentes.md`](docs/fuentes.md) (Spanish).
 

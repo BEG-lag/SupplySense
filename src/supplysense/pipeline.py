@@ -16,11 +16,38 @@ from typing import Any
 from . import store
 from .dates import day_of
 from .http import FetchError, PoliteClient
-from .sources import campeche, cdmx, cfe, comprasmx, fix, jalisco, pemex
+from .sources import (
+    banxico,
+    campeche,
+    cdmx,
+    cfe,
+    comprasmx,
+    dof,
+    fix,
+    guanajuato,
+    jalisco,
+    nuevo_leon,
+    oaj,
+    pemex,
+)
 
 log = logging.getLogger(__name__)
 
 CACHE_DIR = Path(".cache/raw")
+# Fuentes guardadas en data/procedimientos (ComprasMX vive en la caché) y orden de lectura.
+PORTAL_SOURCES = (
+    "cfe",
+    "pemex",
+    "jalisco",
+    "cdmx",
+    "campeche",
+    "guanajuato",
+    "nuevo_leon",
+    "banxico",
+    "oaj",
+    "dof",
+)
+SOURCES = ("cfe", "pemex", "comprasmx", *PORTAL_SOURCES[2:], "fix")
 MIN_RATIO = 0.7
 # Campos que solo trae el detalle de CFE: si la lista no los trae, se conservan.
 KEEP_FROM_PREVIOUS = (
@@ -204,6 +231,116 @@ def update_campeche(
     return procs
 
 
+NL_KEEP = (
+    *STATE_KEEP,
+    "estatus_fuente",
+    "ganadores",
+    "monto",
+    "moneda",
+    "precio_base",
+    "participantes",
+)
+
+
+def update_nuevo_leon(
+    client: PoliteClient, procs: dict[str, dict[str, Any]], today: date, backfill: int = 0
+) -> dict[str, dict[str, Any]]:
+    """Subastas: la lista completa cada día; el detalle (estatus, ganador, participantes) de las
+    recientes que no han terminado, o de todas en la carga inicial."""
+    fresh = nuevo_leon.fetch_list(client)
+    if not fresh:
+        raise ValueError("Nuevo León: el listado de subastas vino vacío")
+    upsert(procs, fresh, today, NL_KEEP)
+    recent = (today - timedelta(days=45)).isoformat()
+    for rec in (procs[r["id"]] for r in fresh):
+        done = rec.get("ganadores") or rec.get("estatus_fuente", "").lower().startswith("cerr")
+        if (backfill and not rec.get("detalle_leido")) or (
+            not done and (rec.get("apertura") or "") >= recent
+        ):
+            rec.update(nuevo_leon.fetch_detail(client, rec["fuente_id"]))
+            rec["detalle_leido"] = today.isoformat()
+        rec["estatus"] = nuevo_leon.status(rec)
+    return procs
+
+
+GTO_KEEP = (*STATE_KEEP, "registro", "ley", "recursos")
+
+
+def update_guanajuato(
+    client: PoliteClient,
+    procs: dict[str, dict[str, Any]],
+    today: date,
+    backfill: int = 0,
+    max_pdfs: int = 30,
+) -> dict[str, dict[str, Any]]:
+    """Lista JSON (la página más reciente; todo el histórico en la carga inicial) y fechas de la
+    convocatoria de las que siguen sin acta de apertura ni fallo."""
+    fresh = guanajuato.fetch_list(client, pages=8 if backfill else 1)
+    if not fresh:
+        raise ValueError("Guanajuato: el listado vino vacío")
+    upsert(procs, fresh, today, GTO_KEEP)
+    recent = (today - timedelta(days=45)).isoformat()
+    pending = [
+        procs[r["id"]]
+        for r in fresh
+        if r["estatus"] == "abierta"
+        and (r.get("publicado") or "") >= recent
+        and not procs[r["id"]].get("detalle_leido")
+    ]
+    for rec in pending[:max_pdfs]:
+        rec["detalle_leido"] = today.isoformat()
+        try:
+            data = guanajuato.fetch_convocatoria(client, rec)
+        except FetchError:
+            continue
+        if data:
+            rec.update(guanajuato.parse_text(guanajuato.pdf_text(data)))
+    # Con recursos federales el procedimiento también está en ComprasMX.
+    for key in [
+        k
+        for k, r in procs.items()
+        if r["fuente"] == "guanajuato" and r.get("recursos") == "Federal"
+    ]:
+        del procs[key]
+    return procs
+
+
+def update_banxico(
+    client: PoliteClient, procs: dict[str, dict[str, Any]], today: date
+) -> dict[str, dict[str, Any]]:
+    fresh = banxico.fetch_list(client)
+    if not fresh:
+        raise ValueError("Banxico: el listado vino vacío")
+    upsert(procs, fresh, today, STATE_KEEP)
+    stale = (today - timedelta(days=3)).isoformat()
+    for rec in (procs[r["id"]] for r in fresh if r["estatus"] in ("abierta", "en_evaluacion")):
+        if (rec.get("detalle_leido") or "") < stale:
+            rec.update(banxico.fetch_stages(client, rec["fuente_id"]))
+            rec["detalle_leido"] = today.isoformat()
+    return procs
+
+
+def update_oaj(
+    client: PoliteClient, procs: dict[str, dict[str, Any]], today: date, backfill: int = 0
+) -> dict[str, dict[str, Any]]:
+    first = 2018 if backfill else today.year - 1
+    fresh = oaj.fetch_list(client, tuple(range(first, today.year + 2)))
+    if not fresh:
+        raise ValueError("OAJ: el listado vino vacío")
+    upsert(procs, fresh, today, STATE_KEEP)
+    return procs
+
+
+def update_dof(
+    client: PoliteClient, procs: dict[str, dict[str, Any]], today: date, backfill: int = 0
+) -> dict[str, dict[str, Any]]:
+    """Resúmenes de convocatoria de los últimos días (o ``backfill`` días hacia atrás)."""
+    known = {r["fuente_id"] for r in procs.values() if r["fuente"] == "dof"}
+    for day in dof.days_back(today, max(3, backfill)):
+        upsert(procs, dof.fetch_day(client, day, known), today, STATE_KEEP)
+    return procs
+
+
 def raw_path(cache_dir: Path, kind: str, year: int) -> Path:
     return cache_dir / comprasmx.FILES[kind].format(year=year)
 
@@ -256,7 +393,7 @@ def update(
     root: Path = store.DATA_DIR,
     cache_dir: Path = CACHE_DIR,
     client: PoliteClient | None = None,
-    sources: tuple[str, ...] = ("cfe", "pemex", "comprasmx", "jalisco", "cdmx", "campeche", "fix"),
+    sources: tuple[str, ...] = SOURCES,
     years: tuple[int, ...] | None = None,
     max_details: int = 150,
     backfill: int = 0,
@@ -311,6 +448,11 @@ def update(
             ("jalisco", update_jalisco, {}),
             ("cdmx", update_cdmx, {"backfill": backfill}),
             ("campeche", update_campeche, {"max_new": max(100, backfill)}),
+            ("guanajuato", update_guanajuato, {"backfill": backfill}),
+            ("nuevo_leon", update_nuevo_leon, {"backfill": backfill}),
+            ("banxico", update_banxico, {}),
+            ("oaj", update_oaj, {"backfill": backfill}),
+            ("dof", update_dof, {"backfill": backfill}),
         ):
             if name in sources:
                 result = report.run(name, func, client, procs, today, **extra)
@@ -338,7 +480,7 @@ def update(
             entry.pop("falla_desde", None)
             entry.pop("error", None)
             entry["ultima_ok"] = today.isoformat()
-    for fuente in ("cfe", "pemex", "jalisco", "cdmx", "campeche"):
+    for fuente in PORTAL_SOURCES:
         report.counts[fuente] = sum(1 for r in procs.values() if r["fuente"] == fuente)
         estado.setdefault(fuente, {})["registros"] = report.counts[fuente]
     report.counts["comprasmx"] = sum(counts.values())

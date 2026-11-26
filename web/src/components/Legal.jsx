@@ -4,6 +4,7 @@
 import { daysUntil, todayMx } from '../lib/dates.js'
 import { formatDateTime } from '../lib/format.js'
 import { buildCalendar, calendarFilename, downloadCalendar, siteBase } from '../lib/ics.js'
+import { AUTONOMOUS_SOURCES, STATE_SOURCES } from '../lib/meta.jsx'
 import { Button, Card, Section } from '../ui/index.jsx'
 
 const LEYES_MX = 'https://github.com/BEG-lag/leyes-mx/blob/main/leyes/'
@@ -44,10 +45,22 @@ function lawFor(rec) {
       fuente: 'Texto y reformas en leyes-mx',
     }
   }
-  if (['jalisco', 'cdmx', 'campeche'].includes(rec.fuente)) {
+  if (STATE_SOURCES.includes(rec.fuente)) {
     return {
       nombre: rec.ley || `Legislación de adquisiciones de ${rec.entidad}`,
       nota: 'Compra con recursos estatales: aplica la ley local de adquisiciones, no la federal. Revisa en la convocatoria el fundamento exacto.',
+    }
+  }
+  if (AUTONOMOUS_SOURCES.includes(rec.fuente)) {
+    return {
+      nombre: rec.ley || `Normativa de contrataciones de ${rec.comprador_nombre || 'la institución'}`,
+      nota: 'Organismo que contrata con sus propias normas, fuera de ComprasMX. Revisa en la convocatoria el fundamento exacto y si aplica supletoriamente la ley federal.',
+    }
+  }
+  if (rec.fuente === 'dof') {
+    return {
+      nombre: rec.ley || 'Según el convocante',
+      nota: 'Resumen de convocatoria publicado en el Diario Oficial. La ley o norma aplicable depende de quién convoca (estado, municipio, universidad u organismo autónomo): revísala en la convocatoria completa.',
     }
   }
   if (rec.ley && LAWS[rec.ley]) return LAWS[rec.ley]

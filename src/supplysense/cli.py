@@ -29,7 +29,8 @@ def main(argv: list[str] | None = None) -> int:
         "--solo",
         nargs="*",
         default=None,
-        help="solo estas fuentes: cfe pemex comprasmx jalisco cdmx campeche fix",
+        help="solo estas fuentes (cfe pemex comprasmx jalisco cdmx campeche guanajuato "
+        "nuevo_leon banxico oaj dof fix)",
     )
     upd.add_argument("--anios", nargs="*", type=int, default=None, help="años de ComprasMX")
     upd.add_argument(
@@ -39,7 +40,8 @@ def main(argv: list[str] | None = None) -> int:
         "--historico",
         type=int,
         default=0,
-        help="carga inicial de estados: ids previos de CDMX y PDFs de Campeche a leer",
+        help="carga inicial de portales propios: ids previos de CDMX, PDFs de Campeche, días "
+        "del DOF; con cualquier valor, el histórico de Guanajuato, OAJ y Nuevo León",
     )
 
     build = sub.add_parser("build", help="genera los JSON y feeds del sitio")
@@ -62,14 +64,10 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     if args.command == "update":
-        from .pipeline import update
+        from .pipeline import SOURCES, update
 
         today = args.today or today_mx()
-        sources = (
-            tuple(args.solo)
-            if args.solo
-            else ("cfe", "pemex", "comprasmx", "jalisco", "cdmx", "campeche", "fix")
-        )
+        sources = tuple(args.solo) if args.solo else SOURCES
         years = tuple(args.anios) if args.anios else None
         report = update(
             today,

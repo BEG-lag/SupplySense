@@ -19,6 +19,31 @@ const SOURCES = {
     what: 'Licitaciones públicas estatales de la Secretaría de Administración, Finanzas y Planeación de Campeche, leídas del PDF de cada convocatoria: objeto, dependencia que solicita, ley aplicable y fechas.',
     limits: 'Solo las de esa Secretaría; las de salud, obra pública y municipios (Carmen incluido) aún no. El estatus se estima por fechas.',
   },
+  guanajuato: {
+    url: 'https://transparencia.guanajuato.gob.mx/transparencia/informacion_publica_licitaciones.php',
+    what: 'Licitaciones, invitaciones y adjudicaciones del gobierno de Guanajuato desde 2021, en el portal de la Unidad de Transparencia. De las recientes se leen las fechas y la ley aplicable en la convocatoria (incluso dentro del ZIP de la Secretaría de Finanzas, sin bajarlo completo).',
+    limits: 'No publica estatus: con acta de fallo se da por concluida, con acta de apertura queda en evaluación, y si no, se estima por fechas. Las convocatorias escaneadas (Educación) no dan fechas. Lo pagado con recursos federales se descarta porque ya está en ComprasMX.',
+  },
+  nuevo_leon: {
+    url: 'https://subasta.nl.gob.mx/monitoreosubastas.asp',
+    what: 'Subastas electrónicas inversas del gobierno de Nuevo León desde 2016: dependencia que solicita, fecha, precio base, ganador, mejor oferta y proveedores que participaron.',
+    limits: 'Las convocatorias de licitación de nl.gob.mx rechazan a los lectores automáticos y no se leen; las de Agua y Drenaje de Monterrey están escaneadas.',
+  },
+  banxico: {
+    url: 'https://www.banxico.org.mx/PortalProveedores/',
+    what: 'Licitaciones e invitaciones del Banco de México desde 2021 (adquisiciones, enajenaciones y obra), con el calendario de cada etapa.',
+    limits: 'Banxico no publica en ComprasMX. Ganador y monto solo vienen en las actas en PDF y no se leen.',
+  },
+  oaj: {
+    url: 'https://www.oaj.gob.mx/convocatoriasDGRMSG.htm',
+    what: 'Convocatorias del Órgano de Administración Judicial (antes Consejo de la Judicatura Federal), de Recursos Materiales e Inmuebles y Mantenimiento. También compra para la Suprema Corte y el Tribunal Electoral.',
+    limits: 'No publica estatus: con acta de fallo se da por concluida y, si no, se estima por la fecha de publicación.',
+  },
+  dof: {
+    url: 'https://www.dof.gob.mx/',
+    what: 'Resúmenes de convocatoria de la sección de concursos del Diario Oficial: universidades, poderes, organismos autónomos, estados y municipios que no publican en ComprasMX (INE, Cámara de Diputados, UNAM, universidades estatales, entre otros).',
+    limits: 'Solo licitaciones públicas (las invitaciones no se publican ahí). Se descarta lo que ya trae número de ComprasMX y lo de los portales que ya leemos. El texto del DOF a veces corta palabras; el estatus se estima por fechas.',
+  },
   cfe: {
     url: 'https://msc.cfe.mx/Aplicaciones/NCFE/Concursos/',
     what: 'Todos los procedimientos del Micrositio de Concursos desde 2015: estatus, ganadores y monto adjudicado. De los vigentes se lee además el detalle (empresa de CFE y fechas de apertura y fallo).',
@@ -42,12 +67,16 @@ export default function Sources() {
   return (
     <>
       <PageHeader eyebrow="Fuentes y método" title="De dónde sale cada dato">
-        SupplySense no inventa ni estima convocatorias: reúne lo que publican ComprasMX, CFE, PEMEX y
-        los portales de compras de Jalisco, CDMX y Campeche, lo ordena y lo cruza. Cada registro liga a su fuente oficial.
+        SupplySense no inventa ni estima convocatorias: reúne lo que publican ComprasMX, CFE, PEMEX,
+        los portales de compras de Jalisco, CDMX, Campeche, Guanajuato y Nuevo León, Banxico, el
+        Poder Judicial y la sección de concursos del DOF, lo ordena y lo cruza. Cada registro liga a
+        su fuente oficial.
       </PageHeader>
 
       <div className="grid gap-4">
-        {['comprasmx', 'cfe', 'pemex', 'jalisco', 'cdmx', 'campeche'].map((key) => [key, SOURCES[key]]).map(([key, s]) => {
+        {['comprasmx', 'cfe', 'pemex', 'jalisco', 'cdmx', 'campeche', 'guanajuato', 'nuevo_leon', 'banxico', 'oaj', 'dof']
+          .filter((key) => meta.fuentes[key])
+          .map((key) => [key, SOURCES[key]]).map(([key, s]) => {
           const f = meta.fuentes[key]
           return (
             <Card key={key} className="p-5">
@@ -69,12 +98,14 @@ export default function Sources() {
 
       <p className="mt-4 text-sm leading-relaxed text-ink-3">
         Pendientes: Estado de México (su portal exige sesiones de JSF y publica las fechas solo en
-        PDF) y Tabasco (el portal estatal no respondió al revisarlo).
+        PDF) y Tabasco (el portal estatal no respondió al revisarlo). Veracruz y el Tribunal Electoral
+        protegen sus sitios con verificación anti-robots: no se leen, y lo que publican en el DOF o con
+        dinero federal sí aparece.
       </p>
 
       <Section title="Cómo se arma">
         <ol className="list-decimal space-y-2 pl-5 text-[15px] leading-relaxed text-ink-2">
-          <li>Cada mañana, un proceso automático (GitHub Actions) lee las tres fuentes. Si una falla, se conserva lo último bueno y se avisa al tercer día.</li>
+          <li>Cada mañana, un proceso automático (GitHub Actions) lee todas las fuentes. Si una falla, se conserva lo último bueno y se avisa al tercer día.</li>
           <li>Los registros se guardan en archivos de texto versionados: cada cambio de una fuente queda en el historial público del repositorio.</li>
           <li>Las reglas son archivos legibles: compradores del sector, palabras de contexto, categorías y correcciones manuales.</li>
           <li>Cada registro lleva una de 35 categorías, en tres grupos: energía y O&amp;G, salud y general. La vertical de energía reúne a CFE, PEMEX, las dependencias del sector y lo que menciona gasoductos, hidrocarburos o refinerías.</li>
@@ -88,7 +119,7 @@ export default function Sources() {
         <ul className="list-disc space-y-2 pl-5 text-[15px] leading-relaxed text-ink-2">
           <li>La clasificación por categoría es por palabras clave: es buena para orientarse, no infalible. Lo que no encaja queda en “Otros”.</li>
           <li>Un monto adjudicado por procedimiento puede cubrir varias partidas o ganadores; compárese con cuidado.</li>
-          <li>Estados y municipios: solo aparecen sus compras con dinero federal (las que pasan por ComprasMX). Las que hacen con recursos propios se publican en portales locales que aún no están integrados.</li>
+          <li>Estados y municipios: aparecen sus compras con dinero federal (ComprasMX), sus licitaciones públicas resumidas en el DOF y, en cinco estados, las de su portal propio. Las invitaciones y adjudicaciones con recursos propios de los demás estados aún no.</li>
         </ul>
       </Section>
 

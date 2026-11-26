@@ -62,7 +62,12 @@ comprador. Energía y O&G es su vertical destacada. Cada registro liga a su fuen
 | Jalisco, compras estatales | VERDE | Convocatorias del portal de la Secretaría de Administración, con calendario de junta, apertura y fallo |
 | CDMX, Concurso Digital | VERDE | Convocatorias de dependencias locales, con fechas; estatus estimado por fechas |
 | Campeche, SAFIN | AMARILLO | Licitaciones estatales leídas del PDF de cada convocatoria; faltan salud, obra pública y municipios |
-| Estado de México y Tabasco | ROJO | Pendientes: Edomex exige sesiones JSF y fechas en PDF; el portal de Tabasco no respondió |
+| Guanajuato, portal de transparencia | VERDE | Licitaciones estatales desde 2021; fechas de la convocatoria en PDF (aun dentro de un ZIP, bajando solo ese archivo por rangos) |
+| Nuevo León, subastas inversas | VERDE | Precio base, ganador, mejor oferta y participantes de cada subasta desde 2016 |
+| Banco de México | VERDE | Licitaciones e invitaciones desde 2021 con la fecha de cada etapa |
+| Poder Judicial (OAJ) | VERDE | Convocatorias de Recursos Materiales e Inmuebles; compra también para la Suprema Corte |
+| DOF, convocatorias | AMARILLO | Resúmenes de licitaciones públicas de quien no publica en ComprasMX (universidades, INE, Diputados, estados, municipios) |
+| Estado de México, Tabasco y Veracruz | ROJO | Edomex exige sesiones JSF; Tabasco no respondió; Veracruz tiene CAPTCHA anti-robots (no se salta) |
 
 El detalle de cada endpoint, formato y rareza está en [`docs/fuentes.md`](docs/fuentes.md).
 
