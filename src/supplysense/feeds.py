@@ -25,6 +25,8 @@ SOURCES = {
     "banxico": "Banxico",
     "oaj": "Poder Judicial (OAJ)",
     "dof": "DOF",
+    "tabasco": "Tabasco",
+    "edomex": "Estado de México",
 }
 
 

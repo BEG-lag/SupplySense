@@ -29,6 +29,16 @@ const SOURCES = {
     what: 'Subastas electrónicas inversas del gobierno de Nuevo León desde 2016: dependencia que solicita, fecha, precio base, ganador, mejor oferta y proveedores que participaron.',
     limits: 'Las convocatorias de licitación de nl.gob.mx rechazan a los lectores automáticos y no se leen; las de Agua y Drenaje de Monterrey están escaneadas.',
   },
+  tabasco: {
+    url: 'https://portalanticorrupcion.tabasco.gob.mx:85/compranet/Publico/Licitacion_Adquisiciones/Adq_Seguimiento.aspx',
+    what: 'Licitaciones estatales de adquisiciones y obra en el Compranet 3.0 de la Secretaría Anticorrupción y Buen Gobierno de Tabasco: estatus oficial, convocatoria y, cuando hay contrato, proveedor e importe. El objeto, la ley y las fechas se leen de la convocatoria.',
+    limits: 'Las convocatorias son escaneos con texto reconocido por OCR: el objeto o alguna fecha pueden salir con errores. El importe de los contratos viene con IVA; en precios se le quita el 16%. El listado viejo del portal estatal ya no responde.',
+  },
+  edomex: {
+    url: 'https://compramex.edomex.gob.mx/compramex/public/catalogosExternos/procedimientsoAdquisitivos.xhtml',
+    what: 'COMPRAMEX: procedimientos del sector central del Estado de México (con estatus y etapa oficiales) y licitaciones e invitaciones de organismos auxiliares y municipios que traen su objeto.',
+    limits: 'No hay liga directa a cada procedimiento ni dice qué dependencia compra en organismos y municipios (se deduce del prefijo cuando es inequívoco). Ahí el estatus se estima: abierta solo 14 días tras publicarse. Se leen unas 24 páginas al día porque el portal bloquea por volumen; los documentos subidos como procedimientos y las adjudicaciones directas se descartan.',
+  },
   banxico: {
     url: 'https://www.banxico.org.mx/PortalProveedores/',
     what: 'Licitaciones e invitaciones del Banco de México desde 2021 (adquisiciones, enajenaciones y obra), con el calendario de cada etapa.',
@@ -68,13 +78,14 @@ export default function Sources() {
     <>
       <PageHeader eyebrow="Fuentes y método" title="De dónde sale cada dato">
         SupplySense no inventa ni estima convocatorias: reúne lo que publican ComprasMX, CFE, PEMEX,
-        los portales de compras de Jalisco, CDMX, Campeche, Guanajuato y Nuevo León, Banxico, el
+        los portales de compras de Jalisco, CDMX, Campeche, Guanajuato, Nuevo León, Tabasco y el Estado
+        de México, Banxico, el
         Poder Judicial y la sección de concursos del DOF, lo ordena y lo cruza. Cada registro liga a
         su fuente oficial.
       </PageHeader>
 
       <div className="grid gap-4">
-        {['comprasmx', 'cfe', 'pemex', 'jalisco', 'cdmx', 'campeche', 'guanajuato', 'nuevo_leon', 'banxico', 'oaj', 'dof']
+        {['comprasmx', 'cfe', 'pemex', 'jalisco', 'cdmx', 'campeche', 'guanajuato', 'nuevo_leon', 'tabasco', 'edomex', 'banxico', 'oaj', 'dof']
           .filter((key) => meta.fuentes[key])
           .map((key) => [key, SOURCES[key]]).map(([key, s]) => {
           const f = meta.fuentes[key]
@@ -97,8 +108,7 @@ export default function Sources() {
       </div>
 
       <p className="mt-4 text-sm leading-relaxed text-ink-3">
-        Pendientes: Estado de México (su portal exige sesiones de JSF y publica las fechas solo en
-        PDF) y Tabasco (el portal estatal no respondió al revisarlo). Veracruz y el Tribunal Electoral
+        Veracruz y el Tribunal Electoral
         protegen sus sitios con verificación anti-robots: no se leen, y lo que publican en el DOF o con
         dinero federal sí aparece.
       </p>
@@ -119,7 +129,7 @@ export default function Sources() {
         <ul className="list-disc space-y-2 pl-5 text-[15px] leading-relaxed text-ink-2">
           <li>La clasificación por categoría es por palabras clave: es buena para orientarse, no infalible. Lo que no encaja queda en “Otros”.</li>
           <li>Un monto adjudicado por procedimiento puede cubrir varias partidas o ganadores; compárese con cuidado.</li>
-          <li>Estados y municipios: aparecen sus compras con dinero federal (ComprasMX), sus licitaciones públicas resumidas en el DOF y, en cinco estados, las de su portal propio. Las invitaciones y adjudicaciones con recursos propios de los demás estados aún no.</li>
+          <li>Estados y municipios: aparecen sus compras con dinero federal (ComprasMX), sus licitaciones públicas resumidas en el DOF y, en siete estados, las de su portal propio. Las invitaciones y adjudicaciones con recursos propios de los demás estados aún no.</li>
         </ul>
       </Section>
 

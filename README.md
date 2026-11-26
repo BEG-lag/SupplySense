@@ -67,7 +67,9 @@ and oil & gas is its featured vertical. Every record links to its official sourc
 | Banco de México | GREEN | Tenders and invitations since 2021 with the date of every stage |
 | Federal Judiciary (OAJ) | GREEN | Calls from its materials and facilities areas; it also buys for the Supreme Court |
 | DOF, tender notices | AMBER | Public tender summaries from bodies outside ComprasMX (universities, INE, Congress, states, cities) |
-| State of Mexico, Tabasco, Veracruz | RED | Edomex needs JSF sessions; Tabasco did not respond; Veracruz is behind an anti-bot CAPTCHA (not bypassed) |
+| Tabasco, Compranet 3.0 | AMBER | Official status, call PDF (OCR) and contracts with supplier and amount |
+| State of Mexico, COMPRAMEX | AMBER | Central government with official status; agencies and municipalities only when the row carries the purchase object. About 24 requests a day: the site blocks by volume |
+| Veracruz and TEPJF | RED | Behind an anti-bot CAPTCHA (not bypassed); their DOF notices and federal-funded tenders do appear |
 
 Endpoints, formats and quirks are documented in [`docs/fuentes.md`](docs/fuentes.md) (Spanish).
 

@@ -80,6 +80,8 @@ SOURCE_LABELS = {
     "banxico": "Banxico",
     "oaj": "Poder Judicial (OAJ)",
     "dof": "DOF",
+    "tabasco": "Tabasco",
+    "edomex": "Estado de México",
 }
 # Portales propios (estados, organismos autónomos y resúmenes del DOF): lo que se compra fuera
 # de ComprasMX. Prefijo para el id del comprador.
@@ -92,6 +94,8 @@ STATE_SOURCES = {
     "banxico": "bmx",
     "oaj": "oaj",
     "dof": "dof",
+    "tabasco": "tab",
+    "edomex": "mex",
 }
 # Ámbito de cada fuente, para agruparlas en el sitio.
 SOURCE_SCOPE = {
@@ -106,14 +110,18 @@ SOURCE_SCOPE = {
     "banxico": "autonomo",
     "oaj": "autonomo",
     "dof": "dof",
+    "tabasco": "estatal",
+    "edomex": "estatal",
 }
 # Fuentes cuyo estatus de "abierta" viene de la propia fuente (no se estima).
-OFFICIAL_STATUS = {"jalisco", "nuevo_leon", "banxico"}
+OFFICIAL_STATUS = {"jalisco", "nuevo_leon", "banxico", "tabasco"}
 # Adjudicaciones con ganador y monto en el propio procedimiento.
-AWARD_SOURCES = {"cfe", "nuevo_leon"}
+AWARD_SOURCES = {"cfe", "nuevo_leon", "tabasco"}
+# Tabasco publica el importe con IVA; para comparar con los demás se quita [SUPUESTO: 16%].
+IVA = 1.16
 # Una abierta sin fecha de apertura se da por concluida después de este tiempo [SUPUESTO].
 STATE_STALE_DAYS = 60
-STALE_DAYS = {"guanajuato": 30, "oaj": 30, "dof": 30}
+STALE_DAYS = {"guanajuato": 30, "oaj": 30, "dof": 30, "edomex": 14}
 _WORD = re.compile(r"[a-z0-9]{4,}")
 _STOP = {
     "para",
@@ -310,16 +318,19 @@ def final_status(rec: dict[str, Any], today: date) -> tuple[str, bool]:
         last = day_of(rec.get("apertura") or rec.get("publicado"))
         if last and (today - date.fromisoformat(last)).days > STATE_STALE_DAYS:
             return "concluida", True
-        return status, rec["fuente"] not in OFFICIAL_STATUS
+        return status, rec["fuente"] not in OFFICIAL_STATUS and not rec.get("estatus_oficial")
     if rec["fuente"] in STATE_SOURCES and status == "abierta":
         # Los portales propios solo muestran lo vigente: el estatus sale de las fechas.
-        estimated = rec["fuente"] not in OFFICIAL_STATUS
+        official = rec["fuente"] in OFFICIAL_STATUS or bool(rec.get("estatus_oficial"))
+        estimated = not official
         if rec.get("fallo") and rec["fallo"][:10] < iso:
             return "concluida", True
         if rec.get("apertura") and rec["apertura"][:10] < iso:
             return "en_evaluacion", True
         if rec.get("apertura"):
             return "abierta", estimated
+        if official:  # la fuente dice que está vigente y no da fecha de apertura
+            return "abierta", False
         published = day_of(rec.get("publicado"))
         if published:
             stale_days = STALE_DAYS.get(rec["fuente"], STATE_STALE_DAYS)
@@ -455,7 +466,9 @@ def build_awards(
                 "tipo_contratacion": rec.get("tipo_contratacion"),
                 "tipo_procedimiento": rec.get("tipo_procedimiento"),
                 "fecha": day_of(rec.get("fallo") or rec.get("publicado")),
-                "monto_mxn": rec["monto"],
+                "monto_mxn": round(rec["monto"] / IVA, 2)
+                if rec.get("monto_nota") == "con IVA"
+                else rec["monto"],
                 "moneda": "MXN",
                 "ganadores": rec.get("ganadores") or [],
             }

@@ -23,12 +23,14 @@ from .sources import (
     cfe,
     comprasmx,
     dof,
+    edomex,
     fix,
     guanajuato,
     jalisco,
     nuevo_leon,
     oaj,
     pemex,
+    tabasco,
 )
 
 log = logging.getLogger(__name__)
@@ -46,6 +48,8 @@ PORTAL_SOURCES = (
     "banxico",
     "oaj",
     "dof",
+    "tabasco",
+    "edomex",
 )
 SOURCES = ("cfe", "pemex", "comprasmx", *PORTAL_SOURCES[2:], "fix")
 MIN_RATIO = 0.7
@@ -341,6 +345,72 @@ def update_dof(
     return procs
 
 
+# Lo que solo sale de la convocatoria en PDF: se conserva entre corridas.
+TAB_FROM_PDF = (
+    "titulo",
+    "ley",
+    "caracter",
+    "registro",
+    "aclaraciones",
+    "apertura",
+    "apertura_economica",
+    "fallo",
+    "detalle_leido",
+    "publicado",
+    "periodico_oficial",
+)
+
+
+def update_tabasco(
+    client: PoliteClient,
+    procs: dict[str, dict[str, Any]],
+    today: date,
+    backfill: int = 0,
+    max_pdfs: int = 40,
+) -> dict[str, dict[str, Any]]:
+    """Seguimiento, vigentes y contratos del año (y del anterior en la carga inicial); el objeto
+    y las fechas, de la convocatoria de cada procedimiento nuevo."""
+    fresh = tabasco.fetch_all(client)
+    if backfill:
+        fresh += tabasco.fetch_all(client, today.year - 1)
+    if not fresh:
+        raise ValueError("Tabasco: el listado vino vacío")
+    for rec in fresh:
+        prev = procs.get(rec["id"])
+        if prev and prev.get("detalle_leido"):
+            rec.update({k: prev[k] for k in TAB_FROM_PDF if prev.get(k)})
+    upsert(procs, fresh, today, STATE_KEEP)
+    pending = [procs[r["id"]] for r in fresh if not procs[r["id"]].get("detalle_leido")]
+    for rec in pending[:max_pdfs]:
+        rec["detalle_leido"] = today.isoformat()
+        if not rec.get("url"):
+            continue
+        try:
+            text = tabasco.pdf_text(client.get_ok(rec["url"]).content)
+        except (FetchError, ValueError):
+            continue
+        year = int(rec["numero"][-4:]) if rec["numero"][-4:].isdigit() else None
+        rec.update(tabasco.parse_text(text, year))
+    # Objeto y publicación del Periódico Oficial (la mayoría de las convocatorias son escaneos).
+    try:
+        poe = tabasco.fetch_poe(client, pages=16 if backfill else 2)
+    except FetchError:
+        poe = []
+    tabasco.enrich([r for r in procs.values() if r["fuente"] == "tabasco"], poe)
+    return procs
+
+
+def update_edomex(
+    client: PoliteClient, procs: dict[str, dict[str, Any]], today: date
+) -> dict[str, dict[str, Any]]:
+    """COMPRAMEX: unas 24 peticiones con pausas (el portal bloquea por volumen)."""
+    fresh = edomex.fetch_all(client, today.year)
+    if not fresh:
+        raise ValueError("Estado de México: el listado vino vacío")
+    upsert(procs, fresh, today, STATE_KEEP)
+    return procs
+
+
 def raw_path(cache_dir: Path, kind: str, year: int) -> Path:
     return cache_dir / comprasmx.FILES[kind].format(year=year)
 
@@ -453,6 +523,8 @@ def update(
             ("banxico", update_banxico, {}),
             ("oaj", update_oaj, {"backfill": backfill}),
             ("dof", update_dof, {"backfill": backfill}),
+            ("tabasco", update_tabasco, {"backfill": backfill}),
+            ("edomex", update_edomex, {}),
         ):
             if name in sources:
                 result = report.run(name, func, client, procs, today, **extra)

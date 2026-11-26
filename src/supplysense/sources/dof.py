@@ -16,7 +16,7 @@ import re
 from datetime import date, timedelta
 from typing import Any
 
-from ..dates import MONTHS
+from ..dates import from_loose as parse_when
 from ..http import PoliteClient
 from ..rules import categorize
 from ..text import clean, fold
@@ -58,9 +58,6 @@ _OBJ_QUOTED = re.compile(
     r"relativ[ao]s?\s+a(?:l|\s+la|\s+los|\s+las)?\s+[“\"«]([^”\"»]{12,300})[”\"»]", re.I
 )
 _OBJ_TEXT = re.compile(r"relativ[ao]s?\s+a(?:l|\s+la|\s+los|\s+las)?\s+([^”\"».]{12,240})", re.I)
-_DATE_WORDS = re.compile(r"(\d{1,2})de([a-zñ]+?)de(\d{4})")
-_DATE_NUM = re.compile(r"(\d{1,2})/(\d{1,2})/(\d{4})")
-_TIME = re.compile(r"(\d{1,2}):(\d{2})")
 STATES = {
     "aguascalientes": "Aguascalientes",
     "baja california sur": "Baja California Sur",
@@ -99,32 +96,6 @@ STATES = {
 
 def _text(fragment: str) -> str:
     return clean(html.unescape(re.sub(r"<[^>]+>", " ", fragment))) or ""
-
-
-def parse_when(value: str | None) -> str | None:
-    """ "04 de diciembr e de 2026, 12:00 horas" o "24/11/20 26 10:00" → ISO. El DOF corta
-    palabras y números con espacios; se compacta antes de leer."""
-    if not value:
-        return None
-    compact = re.sub(r"\s+", "", fold(value))
-    day = month = year = None
-    m = _DATE_WORDS.search(compact)
-    if m and m.group(2) in MONTHS:
-        day, month, year = int(m.group(1)), MONTHS[m.group(2)], int(m.group(3))
-        rest = compact[m.end() :]
-    elif m2 := _DATE_NUM.search(compact):
-        day, month, year = int(m2.group(1)), int(m2.group(2)), int(m2.group(3))
-        rest = compact[m2.end() :]
-    else:
-        return None
-    try:
-        base = date(year, month, day).isoformat()
-    except ValueError:
-        return None
-    t = _TIME.search(rest[:20])
-    if t and int(t.group(1)) < 24:
-        return f"{base}T{int(t.group(1)):02d}:{t.group(2)}:00"
-    return base
 
 
 def convocante(titulo: str) -> str:

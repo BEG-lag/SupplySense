@@ -15,8 +15,8 @@ Cada registro del sitio liga a su fuente oficial. Este documento dice de dónde 
 | Banxico | VERDE | Licitaciones e invitaciones con calendario de etapas | 923 procedimientos desde 2021 |
 | Poder Judicial (OAJ) | VERDE | Convocatorias de Recursos Materiales e Inmuebles; compra también para SCJN y TEPJF | Unas 90 al año |
 | DOF, sección de concursos | AMARILLO | Resúmenes de licitaciones públicas de quien no publica en ComprasMX (universidades, INE, Diputados, estados, municipios) | 60 a 140 notas por edición, la mayoría ya en ComprasMX |
-| Estado de México | ROJO | COMPRAMEX (JSF/PrimeFaces) | Pendiente |
-| Tabasco | ROJO | Portal estatal sin respuesta | Pendiente |
+| Tabasco | AMARILLO | Compranet 3.0 estatal: estatus oficial, convocatoria y contratos con proveedor e importe | Unas 85 licitaciones al año; objeto y fechas del PDF con OCR |
+| Estado de México | AMARILLO | COMPRAMEX: sector central completo; organismos y municipios solo con objeto | 220 del sector central en 2026; unas 150 de organismos y municipios con objeto |
 | Nuevo León, licitaciones | ROJO | nl.gob.mx rechaza a lectores automáticos (HTTP 403) | No se lee: se respeta el bloqueo |
 | Veracruz y TEPJF | ROJO | Verificación anti-robots (CAPTCHA) | No se lee; lo que publican en el DOF o con dinero federal sí aparece |
 | Tipo de cambio FIX | VERDE | Conversión de contratos en dólares | Serie diaria desde 1991, del repo indicadores-mx |
@@ -99,10 +99,26 @@ Los portales estatales solo muestran lo vigente: lo que sale del listado se cons
 - **Duplicados**: se descarta la nota si trae un número de ComprasMX (LA-, LO-, IA-…) o si el convocante es CFE o PEMEX, y en el build, la que repite el número de un portal que ya leemos (Banxico, OAJ). No se guardan los nombres de quien firma.
 - Cada día se leen las ediciones de los últimos 3 días (las notas ya leídas no se vuelven a pedir; las descartadas sí, unas 200 peticiones); la carga inicial, 45.
 
-### Pendientes
+### Tabasco
+
+- **Listado**: Compranet 3.0 de la Secretaría Anticorrupción y Buen Gobierno estatal, `https://portalanticorrupcion.tabasco.gob.mx:85/compranet/Publico/`, pantallas `Vigentes` (venta de bases: abiertas), `Seguimiento` (todas, con estatus) y `Contratos`, para adquisiciones y obra pública. Detalle de la receta abajo.
+- **Estatus oficial**: vigente, abierta; SEGUIMIENTO, en evaluación (ya no se venden bases); TERMINADA, DESIERTA o CANCELADA.
+- **Convocatoria**: PDF escaneado con capa de texto. Se lee una vez: objeto ("relativa a … de conformidad"), ley y la tabla de fechas, cuyo texto sale en orden de columnas (bases, junta, apertura técnica, apertura económica) con el año separado; se toma el del número de licitación. El OCR deja errores como "1 O de noviembre", que se corrigen al leer.
+- **Contratos**: proveedor e importe por número de licitación; el importe trae IVA y en precios se divide entre 1.16 [SUPUESTO].
+
+### Estado de México
+
+- **Receta**: la de abajo, con unas 24 peticiones por corrida y pausas de 2 s: sector central con estatus 1 a 4 y los tipos 3, 1 y 5 con estatus 0.
+- **Sector central**: número, convocatoria, partida genérica (sirve de título), fecha, estatus y etapa oficiales.
+- **Organismos, municipios y autónomos**: solo filas que parecen licitación o invitación y traen objeto; se descartan documentos ("ACTA…", "FALLO…", "… - CONTRATO"), adjudicaciones directas, números cortados y listas de números. La dependencia se deduce de prefijos inequívocos (ISSEMYM, ISEM, JCEM, CAEM, DIFEM, SEIEM, COBAEM y otros); si no, "Organismo auxiliar" o "Municipio del Estado de México". Estatus estimado: abierta 14 días tras publicarse.
+- **Sin liga directa**: COMPRAMEX guarda la fila elegida en la sesión; el sitio liga a la búsqueda.
+
+### Recetas de referencia
 
 - **Estado de México** (AMARILLO, revisado el 26-11-2026): COMPRAMEX (`compramex.edomex.gob.mx/compramex/public/catalogosExternos/procedimientsoAdquisitivos.xhtml`) es JSF/PrimeFaces, pero sí tiene lista global. Con "Unidad administrativa = 0" trae todo un tipo de organismo (3 auxiliares, 1 municipios, 5 autónomos; el 6, sector central, exige estatus 1 a 4). Receta: GET por `javax.faces.ViewState`; POST AJAX `change` de `formulario:slTipoOrganismo` (salvo tipo 6); POST `formulario:btnFiltrar` (da `rowCount` y el id de la tabla); POST AJAX de paginación con `_rows` igual a `rowCount` (1,671 filas en una respuesta). Solo el año en curso; el histórico está en `historico/historicoProcedimientos.xhtml`. Problemas: filas que son documentos ("ACTA…", "FALLO…") y números repetidos; la dependencia no aparece (se deduce del prefijo: ISEM-, ISSEMYM, JCEM, DIFEM); solo el sector central tiene estatus confiable y PDF con texto. **Un firewall corta la conexión por volumen acumulado** (unas 130 peticiones en 20 minutos bastaron para un bloqueo de más de 20 minutos): presupuesto diario de unas 20 peticiones de lista y 40 de detalle [ESTIMADO].
 - **Tabasco** (AMARILLO, revisado el 26-11-2026): el iframe viejo (`187.157.9.81`) está muerto. Su reemplazo es Compranet 3.0 de la Secretaría Anticorrupción y Buen Gobierno estatal: `https://portalanticorrupcion.tabasco.gob.mx:85/compranet/Publico/Licitacion_Adquisiciones/Adq_{Vigentes,Seguimiento,Fallos,Contratos}.aspx` y `Licitacion_Obra_Pub/Obra_Pub_*.aspx`. ASP.NET WebForms con DevExpress: dos GET (el primero crea la sesión), paginación por POST con `__EVENTTARGET=ctl00$ContentPlaceHolder1$grd_licitaciones` y `__EVENTARGUMENT=12|PAGERONCLICK3|PN<k>`; año con `chklist_anio`. 2026: 59 de adquisiciones y 25 de obra; contratos con proveedor e importe (130 en 2025). Objeto y fechas solo en PDF escaneado con OCR; el Periódico Oficial (`tabasco.gob.mx/PeriodicoOficial/resultado/LICITACI/0?page=N`) da convocante y objeto en la lista.
+### Pendientes
+
 - **SCJN**: su página de vigentes trae uno o dos procedimientos; sus licitaciones públicas salen en el DOF y muchas compras las hace el OAJ.
 - **INE, UNAM y Cámara de Diputados**: sus licitaciones públicas entran por el DOF; sus portales propios (Elementor, certificado incompleto y Oracle APEX) quedan para después.
 - **Veracruz y TEPJF**: protegidos con verificación anti-robots; no se intenta saltarla.

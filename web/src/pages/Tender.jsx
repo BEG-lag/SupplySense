@@ -47,6 +47,8 @@ function OfficialLink({ rec }) {
     banxico: 'Abrir el Portal de Proveedores de Banxico',
     oaj: 'Ver la convocatoria del OAJ',
     dof: 'Ver el resumen en el DOF',
+    tabasco: 'Descargar la convocatoria (PDF)',
+    edomex: 'Buscar en COMPRAMEX',
   }[rec.fuente]
   const url = officialUrl(rec)
   return (
@@ -150,7 +152,7 @@ export default function Tender() {
             )}
           </Fact>
           <Fact label="RFC del proveedor">{rec.proveedor_rfc && <span className="num">{rec.proveedor_rfc}</span>}</Fact>
-          <Fact label="Monto adjudicado">{rec.monto && <span className="num">{formatMXN(rec.monto)}{rec.moneda && rec.moneda !== 'MXN' ? ` ${rec.moneda}` : ''}</span>}</Fact>
+          <Fact label="Monto adjudicado">{rec.monto && <span className="num">{formatMXN(rec.monto)}{rec.moneda && rec.moneda !== 'MXN' ? ` ${rec.moneda}` : ''}{rec.monto_nota ? ` (${rec.monto_nota})` : ''}</span>}</Fact>
           <Fact label="Precio base de la subasta">{rec.precio_base && <span className="num">{formatMXN(rec.precio_base)}{rec.monto ? ` · se adjudicó ${((1 - rec.monto / rec.precio_base) * 100).toFixed(1)}% abajo` : ''}</span>}</Fact>
           <Fact label="Participantes">{rec.participantes?.length > 0 && <span>{rec.participantes.length}: {rec.participantes.join(', ')}</span>}</Fact>
           <Fact label="Testigo social">{rec.testigo_social ? 'Sí' : null}</Fact>

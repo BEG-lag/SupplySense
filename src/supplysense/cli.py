@@ -30,7 +30,7 @@ def main(argv: list[str] | None = None) -> int:
         nargs="*",
         default=None,
         help="solo estas fuentes (cfe pemex comprasmx jalisco cdmx campeche guanajuato "
-        "nuevo_leon banxico oaj dof fix)",
+        "nuevo_leon banxico oaj dof tabasco edomex fix)",
     )
     upd.add_argument("--anios", nargs="*", type=int, default=None, help="años de ComprasMX")
     upd.add_argument(

@@ -67,7 +67,9 @@ comprador. Energía y O&G es su vertical destacada. Cada registro liga a su fuen
 | Banco de México | VERDE | Licitaciones e invitaciones desde 2021 con la fecha de cada etapa |
 | Poder Judicial (OAJ) | VERDE | Convocatorias de Recursos Materiales e Inmuebles; compra también para la Suprema Corte |
 | DOF, convocatorias | AMARILLO | Resúmenes de licitaciones públicas de quien no publica en ComprasMX (universidades, INE, Diputados, estados, municipios) |
-| Estado de México, Tabasco y Veracruz | ROJO | Edomex exige sesiones JSF; Tabasco no respondió; Veracruz tiene CAPTCHA anti-robots (no se salta) |
+| Tabasco, Compranet 3.0 | AMARILLO | Estatus oficial, convocatoria en PDF (OCR) y contratos con proveedor e importe |
+| Estado de México, COMPRAMEX | AMARILLO | Sector central con estatus oficial; organismos y municipios solo cuando la fila trae el objeto. Unas 24 peticiones al día: el portal bloquea por volumen |
+| Veracruz y TEPJF | ROJO | CAPTCHA anti-robots (no se salta); sus resúmenes en el DOF y lo que pagan con dinero federal sí aparecen |
 
 El detalle de cada endpoint, formato y rareza está en [`docs/fuentes.md`](docs/fuentes.md).
 

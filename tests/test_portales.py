@@ -152,3 +152,90 @@ def test_portal_status_from_dates_and_stale_rules():
     old = {"fuente": "oaj", "estatus": "en_evaluacion", "apertura": "2026-06-01"}
     assert final_status(old, TODAY) == ("concluida", True)
     assert number_key("OAJ/SEA/DGRM/LPN/001/2027") == number_key("oaj sea dgrm lpn 001 2027")
+
+
+def test_tabasco_grid_contracts_and_pdf():
+    from supplysense.sources import tabasco
+
+    recs = tabasco.parse_procedures(read("tabasco_seguimiento.html"), "adq")
+    assert recs
+    assert all(r["id"].startswith("tab:") and r["entidad"] == "Tabasco" for r in recs)
+    assert all(r["comprador"] for r in recs)
+    assert {r["estatus"] for r in recs} <= {"en_evaluacion", "concluida", "desierta", "cancelada"}
+    assert all(r["url"] and "Archivos_Adjuntos" in r["url"] for r in recs)
+    vigentes = tabasco.parse_procedures(read("tabasco_seguimiento.html"), "obra", vigente=True)
+    assert all(r["estatus"] == "abierta" for r in vigentes)
+
+    contracts = tabasco.parse_contracts(read("tabasco_contratos.html"))
+    assert contracts["5627D051-001-2025"]["ganadores"] == ["ONT NETWORKS SA DE CV"]
+    assert contracts["5627D051-001-2025"]["monto"] == 7874996.4
+    assert len(contracts["5627D051-002-2025"]["ganadores"]) == 3
+
+    out = tabasco.parse_text(read("tabasco_convocatoria.txt"), 2026)
+    assert out["titulo"].startswith("Adquisición de vales de despensa")
+    assert out["registro"] == "2026-11-05T15:00:00"
+    assert out["aclaraciones"] == "2026-11-10T10:00:00"  # "1 O de noviembre" en el OCR
+    assert out["apertura"] == "2026-11-17T10:00:00"
+    assert out["apertura_economica"] == "2026-11-19T10:00:00"
+    assert out["ley"].startswith("Ley de Adquisiciones, Arrendamientos y Prestación")
+
+
+def test_edomex_central_and_others():
+    from supplysense.sources import edomex
+
+    rows = json.loads(read("edomex_filas.json"))
+    central = edomex.parse_central(rows["central"])
+    assert [r["estatus"] for r in central] == ["abierta", "abierta", "en_evaluacion", "concluida"]
+    assert all(r["estatus_oficial"] and r["entidad"] == "Estado de México" for r in central)
+    assert central[0]["numero"].startswith("LPNP-")
+
+    aux = {r["numero"]: r for r in edomex.parse_other(rows["auxiliares"], "3")}
+    assert "LPE-005-2026" in aux
+    assert aux["LPE-005-2026"]["titulo"].startswith("CONTRATACION DEL SERVICIO DE VIGILANCIA")
+    assert any(r["comprador"].startswith("Colegio de Bachilleres") for r in aux.values())
+    # Actas, adjudicaciones directas y números cortados no entran.
+    assert not any(n.startswith(("ACTA", "AD")) or "IMPERMEABILIZACI" in n for n in aux)
+
+    # "UNIFORMES - JUNTA ACLARACIONES" (una palabra tras quitar el documento) y una lista de
+    # números sin objeto no son convocatorias útiles.
+    assert edomex.parse_other(rows["municipios"], "1") == []
+
+    assert len(edomex.rows(read("edomex_pagina.xml"))) == 9
+    assert edomex.buyer("LPN/ISSEMYM/049/2026", "3").startswith("Instituto de Seguridad Social")
+    assert edomex.buyer("XYZ-001-2026", "1") == "Municipio del Estado de México"
+
+
+def test_official_status_without_dates_stays_open():
+    rec = {
+        "fuente": "edomex",
+        "estatus": "abierta",
+        "estatus_oficial": True,
+        "publicado": "2026-10-01",
+    }
+    assert final_status(rec, TODAY) == ("abierta", False)
+    rec = {"fuente": "edomex", "estatus": "abierta", "publicado": "2026-10-01"}
+    assert final_status(rec, TODAY) == ("concluida", True)
+
+
+def test_tabasco_periodico_oficial_enrichment():
+    from supplysense.sources import tabasco
+
+    poe = tabasco.parse_poe(read("tabasco_periodico.html"))
+    assert poe[0]["fecha"] == "2026-11-04"
+    assert poe[0]["descripcion"].startswith("COBATAB")
+    recs = [
+        {"numero": "5627D051-003-2026", "titulo": "Licitación 5627D051-003-2026",
+         "comprador": "COLEGIO DE BACHILLERES DE TABASCO"},
+        {"numero": "5627A122-001-2026", "titulo": "Licitación 5627A122-001-2026",
+         "comprador": "H. AYUNTAMIENTO DE MACUSPANA"},
+        {"numero": "5627D051-009-2026", "titulo": "Licitación 5627D051-009-2026",
+         "comprador": None},
+    ]  # fmt: skip
+    tabasco.enrich(recs, poe)
+    # Por siglas y consecutivo: COBATAB, licitación 003 de 2026.
+    assert recs[0]["titulo"].startswith("ADQUISICIÓN DE VALES DE DESPENSA")
+    assert recs[0]["publicado"] == "2026-11-04"
+    # La nota de Macuspana trae el número pero no dice qué se compra: queda con su convocante.
+    assert recs[1]["titulo"] == "Licitación 5627A122-001-2026 de H. Ayuntamiento de Macuspana"
+    # El convocante que falta se toma del prefijo del número.
+    assert recs[2]["comprador"] == "COLEGIO DE BACHILLERES DE TABASCO"

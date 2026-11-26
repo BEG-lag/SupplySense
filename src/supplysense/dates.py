@@ -8,6 +8,7 @@ porque así lo publican las dependencias y así se lee en el sitio.
 from __future__ import annotations
 
 import re
+import unicodedata
 from datetime import UTC, date, datetime
 from zoneinfo import ZoneInfo
 
@@ -132,3 +133,36 @@ def from_spanish(value: str | None) -> str | None:
         except ValueError:
             return None
     return None
+
+
+_LOOSE_WORDS = re.compile(r"(\d{1,2})de([a-z]+?)del?(\d{4})")
+_LOOSE_NUM = re.compile(r"(\d{1,2})/(\d{1,2})/(\d{4})")
+_LOOSE_TIME = re.compile(r"(\d{1,2})[:.](\d{2})")
+
+
+def from_loose(value: str | None) -> str | None:
+    """Fecha de texto con cortes y ruido de OCR: "04 de diciembr e de 2026, 12:00 horas",
+    "1 O de noviembre del2026 a las 10:00", "24/11/20 26". Se compacta antes de leer."""
+    if not value:
+        return None
+    compact = re.sub(r"\s+", "", _fold(value))
+    compact = re.sub(r"(?<=\d)o(?=de)", "0", compact)  # "1 O de" leído por OCR
+    m = _LOOSE_WORDS.search(compact)
+    if m and m.group(2) in MONTHS:
+        day, month, year = int(m.group(1)), MONTHS[m.group(2)], int(m.group(3))
+    elif m := _LOOSE_NUM.search(compact):
+        day, month, year = int(m.group(1)), int(m.group(2)), int(m.group(3))
+    else:
+        return None
+    try:
+        base = date(year, month, day).isoformat()
+    except ValueError:
+        return None
+    t = _LOOSE_TIME.search(compact[m.end() : m.end() + 20])
+    if t and int(t.group(1)) < 24:
+        return f"{base}T{int(t.group(1)):02d}:{t.group(2)}:00"
+    return base
+
+
+def _fold(value: str) -> str:
+    return unicodedata.normalize("NFKD", value.lower()).encode("ascii", "ignore").decode()
