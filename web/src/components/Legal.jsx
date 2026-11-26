@@ -3,7 +3,8 @@
 // No es opinión legal: requisitos y plazos se validan en la convocatoria.
 import { daysUntil, todayMx } from '../lib/dates.js'
 import { formatDateTime } from '../lib/format.js'
-import { Card, Section } from '../ui/index.jsx'
+import { buildCalendar, calendarFilename, downloadCalendar, siteBase } from '../lib/ics.js'
+import { Button, Card, Section } from '../ui/index.jsx'
 
 const LEYES_MX = 'https://github.com/BEG-lag/leyes-mx/blob/main/leyes/'
 const DIPUTADOS = 'https://www.diputados.gob.mx/LeyesBiblio/index.htm'
@@ -99,6 +100,7 @@ export default function Legal({ rec }) {
     ['Fallo', rec.fallo],
   ].filter(([, d]) => d)
   const next = events.find(([, d]) => (daysUntil(d, today) ?? -1) >= 0)
+  const calendar = buildCalendar([rec], { siteBase: siteBase(), today })
 
   return (
     <Section title="Marco legal y calendario">
@@ -143,6 +145,14 @@ export default function Legal({ rec }) {
               })}
             </ol>
           ) : <p className="text-sm text-ink-3">La fuente no publica fechas de las etapas.</p>}
+          {calendar && (
+            <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2">
+              <Button size="sm" variant="secondary" onClick={() => downloadCalendar(calendar, calendarFilename(rec.id))}>
+                Agregar a mi calendario (.ics)
+              </Button>
+              <span className="text-[12.5px] text-ink-3">Se descarga un archivo con las fechas que faltan; tu calendario lo importa.</span>
+            </div>
+          )}
           {rec.fallo && (
             <p className="mt-4 text-[13px] leading-relaxed text-ink-3">
               Si participas y no estás de acuerdo con el resultado, la ley aplicable prevé medios de

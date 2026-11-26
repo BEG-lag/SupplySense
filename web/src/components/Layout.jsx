@@ -4,6 +4,7 @@ import { feedUrl } from '../lib/data.js'
 import { formatDate } from '../lib/format.js'
 import { useMeta } from '../lib/meta.jsx'
 import { useFollowed } from '../lib/follow.js'
+import { useInstall, useOnline } from '../lib/pwa.js'
 import { useSaved } from '../lib/saved.js'
 import { cx } from '../ui/index.jsx'
 
@@ -97,6 +98,28 @@ function Header() {
   )
 }
 
+// Sin conexión se sigue usando lo que ya se consultó; se avisa de qué día son esos datos.
+function OfflineBar() {
+  const online = useOnline()
+  const { data: meta } = useMeta()
+  if (online) return null
+  return (
+    <div role="status" className="border-b border-line bg-subtle px-4 py-2 text-center text-[13px] text-ink-2">
+      Sin conexión. Ves lo que ya consultaste en este navegador{meta ? `, con datos al ${formatDate(meta.generado)}` : ''}.
+    </div>
+  )
+}
+
+function InstallButton() {
+  const { canInstall, install } = useInstall()
+  if (!canInstall) return null
+  return (
+    <button type="button" onClick={install} className="mt-4 rounded-full border border-line px-3.5 py-1.5 text-[13px] text-ink-2 hover:border-accent hover:text-accent">
+      Instalar como app (funciona sin internet)
+    </button>
+  )
+}
+
 function Footer() {
   const { data: meta } = useMeta()
   const link = 'text-ink-2 underline decoration-line-strong underline-offset-4 hover:text-accent hover:decoration-accent'
@@ -114,6 +137,7 @@ function Footer() {
               <span className="live" aria-hidden /> Datos al {formatDate(meta.generado)} · cada mañana
             </p>
           )}
+          <InstallButton />
         </div>
         <div>
           <p className="eyebrow mb-3">Fuentes</p>
@@ -121,6 +145,7 @@ function Footer() {
             <li><a className={link} href="https://comprasmx.buengobierno.gob.mx/datos-abiertos" rel="noreferrer" target="_blank">ComprasMX, datos abiertos</a></li>
             <li><a className={link} href="https://msc.cfe.mx/Aplicaciones/NCFE/Concursos/" rel="noreferrer" target="_blank">CFE, Micrositio de Concursos</a></li>
             <li><a className={link} href="https://www.pemex.com/procura/procedimientos-de-contratacion/concursosabiertos/Paginas/default.aspx" rel="noreferrer" target="_blank">PEMEX, concursos abiertos</a></li>
+            <li><Link className={link} to="/fuentes">Portales estatales y método</Link></li>
             <li><Link className={link} to="/estados">Convocatorias por estado</Link></li>
             <li><a className={link} href={feedUrl()}>Feed Atom de convocatorias</a></li>
           </ul>
@@ -149,6 +174,7 @@ export default function Layout() {
     <div className="flex min-h-screen flex-col">
       <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded-full focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-ink">Saltar al contenido</a>
       <Header />
+      <OfflineBar />
       <main id="contenido" className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6 sm:py-12">
         <Outlet />
       </main>

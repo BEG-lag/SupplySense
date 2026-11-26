@@ -4,6 +4,7 @@ import { loadCompany, loadDetail, toRecords, useJson } from '../lib/data.js'
 import { liveStatus } from '../lib/dates.js'
 import { useFollowed } from '../lib/follow.js'
 import { formatDate, formatNumber } from '../lib/format.js'
+import { buildCalendar, downloadCalendar, siteBase } from '../lib/ics.js'
 import { useMeta } from '../lib/meta.jsx'
 import { useSaved } from '../lib/saved.js'
 import { applyFilters, describeFilters } from '../lib/search.js'
@@ -87,6 +88,28 @@ function TenderItem({ f, follow, meta }) {
   )
 }
 
+// Un solo .ics con las fechas que faltan de todas las licitaciones que sigues.
+function CalendarButton({ ids }) {
+  const [state, setState] = useState('idle')
+  if (!ids.length) return null
+  const run = async () => {
+    setState('loading')
+    const recs = (await Promise.all(ids.map((id) => loadDetail(id).catch(() => null)))).filter(Boolean)
+    const ics = buildCalendar(recs, { siteBase: siteBase() })
+    if (!ics) return setState('empty')
+    downloadCalendar(ics, 'supplysense-siguiendo.ics')
+    setState('idle')
+  }
+  return (
+    <span className="flex items-center gap-3">
+      {state === 'empty' && <span className="text-[12.5px] text-ink-3">No quedan fechas por venir.</span>}
+      <Button size="sm" variant="secondary" onClick={run} disabled={state === 'loading'}>
+        {state === 'loading' ? 'Preparando…' : 'Fechas a mi calendario (.ics)'}
+      </Button>
+    </span>
+  )
+}
+
 export default function Saved() {
   const { data: meta } = useMeta()
   const { data: open } = useJson('abiertas.json')
@@ -133,7 +156,10 @@ export default function Saved() {
       )}
 
       {records && (
-        <Section title="Siguiendo">
+        <Section
+          title="Siguiendo"
+          aside={<CalendarButton ids={follow.list.filter((f) => f.tipo === 'licitacion').map((f) => f.id)} />}
+        >
           {follow.list.length === 0 ? (
             <Empty title="Aún no sigues a nadie">
               Usa “Seguir” en la página de una empresa, un comprador o una licitación.
